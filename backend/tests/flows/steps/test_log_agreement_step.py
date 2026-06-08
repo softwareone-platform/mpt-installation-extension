@@ -1,7 +1,7 @@
 from logging import Logger
 
-from swo_playground.context.agreement import EventAgreementContext
-from swo_playground.flows.steps.log_agreement import LogAgreementStep
+from mpt_installation_extension.context.agreement import EventAgreementContext
+from mpt_installation_extension.flows.steps.log_agreement import LogAgreementStep
 
 
 async def test_log_agreement_step(mocker):
