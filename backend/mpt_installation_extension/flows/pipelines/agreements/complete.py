@@ -2,7 +2,7 @@ from typing import override
 
 from mpt_extension_sdk.pipeline import BasePipeline, BaseStep
 
-from swo_playground.flows.steps.log_agreement import LogAgreementStep
+from mpt_installation_extension.flows.steps.log_agreement import LogAgreementStep
 
 
 class CompleteAgreementPipeline(BasePipeline):

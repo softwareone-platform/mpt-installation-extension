@@ -3,9 +3,9 @@ import logging
 from mpt_extension_sdk.api.models.events import Event
 from mpt_extension_sdk.routing import EventRouter
 
-from swo_playground.context.agreement import EventAgreementContext
-from swo_playground.flows.pipelines.agreements.complete import CompleteAgreementPipeline
-from swo_playground.settings import get_extension_settings
+from mpt_installation_extension.context.agreement import EventAgreementContext
+from mpt_installation_extension.flows.pipelines.agreements.complete import CompleteAgreementPipeline
+from mpt_installation_extension.settings import get_extension_settings
 
 logger = logging.getLogger(__name__)
 

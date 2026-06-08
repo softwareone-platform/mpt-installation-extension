@@ -2,7 +2,7 @@ from typing import override
 
 from mpt_extension_sdk.pipeline import BaseStep
 
-from swo_playground.context.agreement import EventAgreementContext
+from mpt_installation_extension.context.agreement import EventAgreementContext
 
 
 class LogAgreementStep(BaseStep):
