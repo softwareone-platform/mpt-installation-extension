@@ -1,12 +1,10 @@
-# SWO Extension Playground
+# MPT Installation Extension
 
-`swo-extension-playground` is a minimal SoftwareOne Marketplace extension built on top of `mpt-extension-sdk` and `mpt-tool`.
-
-It is primarily a playground repository: it shows the baseline extension shape, a simple validation API endpoint, an event listener, a small fulfillment pipeline, and the development workflow used by extension repositories in this ecosystem.
+MPT extension that automatically creates vendor extension installations for a client when an agreement becomes Active.
 
 ## Repository Layout
 
-- `backend/swo_playground/` contains the extension package.
+- `backend/mpt_installation_extension/` contains the extension package.
 - `backend/tests/` contains the pytest suite.
 - `make/*.mk` contains the repository make targets.
 - `compose.yaml` defines the local Docker-based development environment.
