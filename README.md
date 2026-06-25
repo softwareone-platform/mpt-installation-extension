@@ -36,10 +36,11 @@ Shared meaning of common make targets is documented in:
 ## Documentation
 
 - [AGENTS.md](AGENTS.md): entry point for AI agents
-- [docs/architecture.md](docs/architecture.md): architecture placeholder for future repository-specific design
+- [docs/architecture.md](docs/architecture.md): runtime components, event flow, and pipeline boundaries
 - [docs/contributing.md](docs/contributing.md): repository-specific development workflow
 - [docs/local-development.md](docs/local-development.md): local setup and service startup
 - [docs/deployment.md](docs/deployment.md): runtime configuration and deployment-facing settings
+- [docs/external-integrations.md](docs/external-integrations.md): Marketplace API and local mock integration details
 - [docs/testing.md](docs/testing.md): testing strategy and commands
 - [docs/migrations.md](docs/migrations.md): migration workflow and current constraints
 - [docs/documentation.md](docs/documentation.md): repository documentation rules
