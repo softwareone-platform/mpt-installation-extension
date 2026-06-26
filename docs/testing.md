@@ -11,7 +11,13 @@ This file documents only repository-specific testing behavior.
 
 ## Test Scope
 
-The current test scope is limited to verifying that the app starts with no registered routes.
+The current backend test scope covers:
+
+- extension settings loading for product-to-extension mappings
+- agreement activation event router registration
+- extension installation creation for configured product mappings
+- idempotent skips when an account already has the extension installed
+- partial API failure handling while processing multiple configured extensions
 
 ## Commands
 
@@ -44,7 +50,7 @@ Repository-specific test settings come from [`backend/pyproject.toml`](../backen
 
 Repository-specific guidance:
 
-- Use fixtures from [`tests/conftest.py`](../tests/conftest.py) where possible.
+- Use fixtures from [`backend/tests/conftest.py`](../backend/tests/conftest.py) where possible.
 - Mock external Marketplace SDK calls rather than calling real services.
 - Keep tests focused on the behavior of the extension layer, not on internals of `mpt-extension-sdk` itself.
 - Follow the shared unit-test standard for AAA structure, parametrization, mocking rules, deterministic behavior, and coverage expectations.
