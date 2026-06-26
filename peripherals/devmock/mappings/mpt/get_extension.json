@@ -1,11 +1,11 @@
 {
   "request": {
     "method": "GET",
-    "urlPathTemplate": "/public/v1/commerce/agreements"
+    "urlPathTemplate": "/public/v1/integration/extensions/{extension_id}"
   },
   "response": {
     "status": 200,
-    "bodyFileName": "mpt/agreements_page.json",
+    "bodyFileName": "mpt/extension.json",
     "transformers": ["response-template"],
     "headers": { "Content-Type": "application/json" }
   },

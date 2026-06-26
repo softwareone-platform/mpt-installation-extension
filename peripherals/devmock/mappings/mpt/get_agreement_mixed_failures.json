@@ -1,19 +1,19 @@
 {
   "request": {
     "method": "GET",
-    "urlPathTemplate": "/public/v1/commerce/agreements/{agreement_id}"
+    "urlPath": "/public/v1/commerce/agreements/AGR-5555-MIXED"
   },
   "response": {
     "status": 200,
     "bodyFileName": "mpt/agreement.json",
     "transformers": ["response-template"],
     "transformerParameters": {
-      "agreementName": "Playground Agreement",
+      "agreementName": "Mixed Failures Agreement",
       "status": "Active",
-      "productId": "PRD-1111-1111",
-      "productName": "Playground Product"
+      "productId": "PRD-5555-5555",
+      "productName": "Mixed Failures Product"
     },
     "headers": { "Content-Type": "application/json" }
   },
-  "priority": 5
+  "priority": 1
 }

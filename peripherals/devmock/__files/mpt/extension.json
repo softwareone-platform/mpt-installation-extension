@@ -1,0 +1,14 @@
+{
+  "id": "{{request.path.extension_id}}",
+  "name": "Playground Extension {{request.path.extension_id}}",
+  "icon": "public/v1/integration/extensions/{{request.path.extension_id}}/icon",
+  "revision": 1,
+  "status": "Public",
+  "modules": [
+    { "id": "MOD-1111-1111", "name": "Playground Module" }
+  ],
+  "vendor": {
+    "id": "ACC-1111-1111",
+    "name": "Playground Vendor"
+  }
+}

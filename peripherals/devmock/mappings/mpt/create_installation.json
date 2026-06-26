@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathTemplate": "/public/v1/integration/installations"
+  },
+  "response": {
+    "status": 201,
+    "headers": { "Content-Type": "application/json" },
+    "bodyFileName": "mpt/installation.json",
+    "transformers": ["response-template"]
+  },
+  "priority": 5
+}

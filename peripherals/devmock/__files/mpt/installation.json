@@ -1,0 +1,19 @@
+{
+  "id": "EXI-8258-1564-5627",
+  "revision": 1,
+  "status": "Installed",
+  "account": {
+    "id": "{{jsonPath request.body '$.account.id'}}",
+    "name": "Playground Account",
+    "icon": "public/v1/accounts/{{jsonPath request.body '$.account.id'}}/icon",
+    "revision": 1,
+    "type": "Client",
+    "status": "Enabled"
+  },
+  "extension": {
+    "id": "{{jsonPath request.body '$.extension.id'}}",
+    "name": "Playground Extension",
+    "icon": "public/v1/integration/extensions/{{jsonPath request.body '$.extension.id'}}/icon",
+    "revision": 38
+  }
+}

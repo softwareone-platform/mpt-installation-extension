@@ -1,0 +1,12 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/public/v1/integration/extensions/(EXT-4444-NONRECOVERABLE|EXT-5555-NONRECOVERABLE|EXT-6666-NONRECOVERABLE-1|EXT-6666-NONRECOVERABLE-2)"
+  },
+  "response": {
+    "status": 404,
+    "bodyFileName": "mpt/error_not_found.json",
+    "headers": { "Content-Type": "application/json" }
+  },
+  "priority": 1
+}

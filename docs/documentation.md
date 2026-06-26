@@ -19,8 +19,9 @@ This file documents repository-specific documentation rules only.
 - [`README.md`](../README.md): human entry point, overview, quick start, and documentation map
 - [`AGENTS.md`](../AGENTS.md): AI entry point and reading order
 - [`architecture.md`](architecture.md): runtime components, event flow, pipeline boundaries, and design decisions
+- [`local-development.md`](local-development.md): local Docker workflow, devmock usage, and Postman collection entry point
 - [`deployment.md`](deployment.md): runtime configuration and deployment model
-- [`external-integrations.md`](external-integrations.md): Marketplace API and notification integration boundaries
+- [`external-integrations.md`](external-integrations.md): Marketplace API, local mock, and notification integration boundaries
 - [`contributing.md`](contributing.md): repository-specific development workflow
 - [`testing.md`](testing.md): testing strategy and command mapping
 - [`migrations.md`](migrations.md): migration workflow and migration-specific constraints

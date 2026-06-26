@@ -1,0 +1,12 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/public/v1/integration/extensions/(EXT-3333-RECOVERABLE|EXT-5555-RECOVERABLE)"
+  },
+  "response": {
+    "status": 503,
+    "bodyFileName": "mpt/error_service_unavailable.json",
+    "headers": { "Content-Type": "application/json" }
+  },
+  "priority": 1
+}
