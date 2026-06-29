@@ -1,0 +1,12 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/public/v1/integration/installations\\?.*EXT-2222-EXISTS.*ACC-1111-1111.*"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "mpt/installations_page_existing.json",
+    "headers": { "Content-Type": "application/json" }
+  },
+  "priority": 1
+}

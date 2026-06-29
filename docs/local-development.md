@@ -33,6 +33,21 @@ make shell
 make down
 ```
 
+## Running With Devmock
+
+The local compose override starts WireMock as `devmock` on `http://localhost:8000`.
+
+The sample environment in [`backend/.env.sample`](../backend/.env.sample) points `MPT_API_BASE_URL` and `SDK_EXTENSION_URL` to `http://devmock:8000` and configures product `PRD-1111-1111` to install extension `EXT-1111-1112`.
+
+For a local event run, the mocked Marketplace fixtures provide:
+
+- agreement lookup for `/public/v1/commerce/agreements/{agreement_id}`
+- extension lookup for `/public/v1/integration/extensions/{extension_id}`
+- empty installation lookup for `/public/v1/integration/installations`
+- installation creation for `/public/v1/integration/installations`
+
+The Postman collection in [`backend/docs/postman_collection.json`](../backend/docs/postman_collection.json) contains a local agreement activation event that matches these fixtures.
+
 ## Environment Parameters
 
 Local startup requires an `.env` file consumed by Docker Compose.

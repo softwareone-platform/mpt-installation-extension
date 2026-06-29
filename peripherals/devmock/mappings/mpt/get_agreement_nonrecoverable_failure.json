@@ -1,19 +1,19 @@
 {
   "request": {
     "method": "GET",
-    "urlPathTemplate": "/public/v1/commerce/agreements/{agreement_id}"
+    "urlPath": "/public/v1/commerce/agreements/AGR-4444-NONRECOVERABLE"
   },
   "response": {
     "status": 200,
     "bodyFileName": "mpt/agreement.json",
     "transformers": ["response-template"],
     "transformerParameters": {
-      "agreementName": "Playground Agreement",
+      "agreementName": "Non Recoverable Failure Agreement",
       "status": "Active",
-      "productId": "PRD-1111-1111",
-      "productName": "Playground Product"
+      "productId": "PRD-4444-4444",
+      "productName": "Non Recoverable Failure Product"
     },
     "headers": { "Content-Type": "application/json" }
   },
-  "priority": 5
+  "priority": 1
 }

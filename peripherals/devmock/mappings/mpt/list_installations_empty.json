@@ -1,12 +1,11 @@
 {
   "request": {
     "method": "GET",
-    "urlPathTemplate": "/public/v1/commerce/orders/{order_id}"
+    "urlPathTemplate": "/public/v1/integration/installations"
   },
   "response": {
     "status": 200,
-    "bodyFileName": "mpt/order.json",
-    "transformers": ["response-template"],
+    "bodyFileName": "mpt/installations_page_empty.json",
     "headers": { "Content-Type": "application/json" }
   },
   "priority": 5

@@ -1,19 +1,19 @@
 {
   "request": {
     "method": "GET",
-    "urlPathTemplate": "/public/v1/commerce/agreements/{agreement_id}"
+    "urlPath": "/public/v1/commerce/agreements/AGR-NOT-CONFIGURED"
   },
   "response": {
     "status": 200,
     "bodyFileName": "mpt/agreement.json",
     "transformers": ["response-template"],
     "transformerParameters": {
-      "agreementName": "Playground Agreement",
+      "agreementName": "Unconfigured Product Agreement",
       "status": "Active",
-      "productId": "PRD-1111-1111",
-      "productName": "Playground Product"
+      "productId": "PRD-NOT-CONFIGURED",
+      "productName": "Unconfigured Product"
     },
     "headers": { "Content-Type": "application/json" }
   },
-  "priority": 5
+  "priority": 1
 }

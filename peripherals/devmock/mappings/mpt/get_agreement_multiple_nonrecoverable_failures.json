@@ -1,19 +1,19 @@
 {
   "request": {
     "method": "GET",
-    "urlPathTemplate": "/public/v1/commerce/agreements/{agreement_id}"
+    "urlPath": "/public/v1/commerce/agreements/AGR-6666-MULTIPLE-NONRECOVERABLE"
   },
   "response": {
     "status": 200,
     "bodyFileName": "mpt/agreement.json",
     "transformers": ["response-template"],
     "transformerParameters": {
-      "agreementName": "Playground Agreement",
+      "agreementName": "Multiple Non Recoverable Failures Agreement",
       "status": "Active",
-      "productId": "PRD-1111-1111",
-      "productName": "Playground Product"
+      "productId": "PRD-6666-6666",
+      "productName": "Multiple Non Recoverable Failures Product"
     },
     "headers": { "Content-Type": "application/json" }
   },
-  "priority": 5
+  "priority": 1
 }

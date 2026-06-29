@@ -1,0 +1,19 @@
+{
+  "data": [
+    {
+      "id": "EXI-2222-2222",
+      "revision": 1,
+      "status": "Installed",
+      "account": { "id": "ACC-1111-1111" },
+      "extension": { "id": "EXT-2222-EXISTS" },
+      "modules": [{ "id": "MOD-2222-2222" }]
+    }
+  ],
+  "$meta": {
+    "pagination": {
+      "limit": 1,
+      "offset": 0,
+      "total": 1
+    }
+  }
+}

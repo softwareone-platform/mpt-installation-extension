@@ -1,0 +1,271 @@
+{
+  "info": {
+    "name": "mpt-installation-extension",
+    "description": "Sample requests for the MPT Installation Extension backend running locally on `{{base_url}}` (default `http://localhost:8080`).\n\nAuth is wired automatically:\n\n- A collection-level pre-request script builds a non-prod HS256 JWT from the `extension_id`, `account_id` and `account_type` variables and stores it in `auth_token`.\n- Every authenticated request sends `Authorization: Bearer {{auth_token}}` via collection-level Bearer auth (`/health` opts out).\n\nThe default variables match the devmock fixtures used by `compose.local.yaml`: agreement `{{agreement_id}}` resolves to product `PRD-1111-1111`, which is mapped in `backend/.env.sample` to extension `EXT-1111-1112`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Build a non-prod HS256 JWT for the local backend and store it in `auth_token`.",
+          "// The backend decodes claims without verifying the signature, so the dummy",
+          "// secret below is fine for local testing only.",
+          "const CryptoJS = require('crypto-js');",
+          "",
+          "const b64url = (wordArray) => CryptoJS.enc.Base64.stringify(wordArray)",
+          "    .replace(/=+$/, '').replace(/\\+/g, '-').replace(/\\//g, '_');",
+          "const b64urlStr = (s) => b64url(CryptoJS.enc.Utf8.parse(s));",
+          "",
+          "const header = b64urlStr(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));",
+          "const payload = b64urlStr(JSON.stringify({",
+          "    'https://claims.softwareone.com/extensionId': pm.collectionVariables.get('extension_id'),",
+          "    'https://claims.softwareone.com/accountId': pm.collectionVariables.get('account_id'),",
+          "    'https://claims.softwareone.com/accountType': pm.collectionVariables.get('account_type'),",
+          "    exp: Math.floor(Date.now() / 1000) + 10 * 365 * 24 * 60 * 60",
+          "}));",
+          "const signature = b64url(CryptoJS.HmacSHA256(header + '.' + payload, 'non-prod-dummy-secret'));",
+          "",
+          "pm.collectionVariables.set('auth_token', header + '.' + payload + '.' + signature);"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "extension_id",
+      "value": "EXT-1111-1111",
+      "type": "string"
+    },
+    {
+      "key": "account_id",
+      "value": "ACC-0000-3453",
+      "type": "string"
+    },
+    {
+      "key": "account_type",
+      "value": "Operations",
+      "type": "string"
+    },
+    {
+      "key": "agreement_id",
+      "value": "AGR-1111-1111",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "health",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "event / agreement-complete — create missing installation (expected OK)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-request-id", "value": "10147b5c-d430-482c-8c42-d17c5df5e208" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"EVT-1111-1111\",\n  \"object\": {\n    \"id\": \"{{agreement_id}}\",\n    \"name\": \"Playground Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/events/v2/agreements/complete",
+          "host": ["{{base_url}}"],
+          "path": ["events", "v2", "agreements", "complete"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "event / agreement-complete — skip existing installation (expected OK)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-request-id", "value": "20147b5c-d430-482c-8c42-d17c5df5e208" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"EVT-2222-EXISTS\",\n  \"object\": {\n    \"id\": \"AGR-2222-EXISTS\",\n    \"name\": \"Existing Installation Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/events/v2/agreements/complete",
+          "host": ["{{base_url}}"],
+          "path": ["events", "v2", "agreements", "complete"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "event / agreement-complete — recoverable failure (expected DEFER)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-request-id", "value": "30147b5c-d430-482c-8c42-d17c5df5e208" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"EVT-3333-RECOVERABLE\",\n  \"object\": {\n    \"id\": \"AGR-3333-RECOVERABLE\",\n    \"name\": \"Recoverable Failure Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/events/v2/agreements/complete",
+          "host": ["{{base_url}}"],
+          "path": ["events", "v2", "agreements", "complete"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "event / agreement-complete — non-recoverable failure notification (expected OK)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-request-id", "value": "40147b5c-d430-482c-8c42-d17c5df5e208" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"EVT-4444-NONRECOVERABLE\",\n  \"object\": {\n    \"id\": \"AGR-4444-NONRECOVERABLE\",\n    \"name\": \"Non Recoverable Failure Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/events/v2/agreements/complete",
+          "host": ["{{base_url}}"],
+          "path": ["events", "v2", "agreements", "complete"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "event / agreement-complete — mixed recoverable and non-recoverable failures (expected DEFER)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-request-id", "value": "50147b5c-d430-482c-8c42-d17c5df5e208" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"EVT-5555-MIXED\",\n  \"object\": {\n    \"id\": \"AGR-5555-MIXED\",\n    \"name\": \"Mixed Failures Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/events/v2/agreements/complete",
+          "host": ["{{base_url}}"],
+          "path": ["events", "v2", "agreements", "complete"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "event / agreement-complete — multiple non-recoverable failures (expected OK)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-request-id", "value": "60147b5c-d430-482c-8c42-d17c5df5e208" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"EVT-6666-MULTIPLE-NONRECOVERABLE\",\n  \"object\": {\n    \"id\": \"AGR-6666-MULTIPLE-NONRECOVERABLE\",\n    \"name\": \"Multiple Non Recoverable Failures Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/events/v2/agreements/complete",
+          "host": ["{{base_url}}"],
+          "path": ["events", "v2", "agreements", "complete"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "event / agreement-complete — unconfigured product (expected OK skip)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-request-id", "value": "70147b5c-d430-482c-8c42-d17c5df5e208" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"EVT-NOT-CONFIGURED\",\n  \"object\": {\n    \"id\": \"AGR-NOT-CONFIGURED\",\n    \"name\": \"Unconfigured Product Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/events/v2/agreements/complete",
+          "host": ["{{base_url}}"],
+          "path": ["events", "v2", "agreements", "complete"]
+        }
+      },
+      "response": []
+    }
+  ]
+}

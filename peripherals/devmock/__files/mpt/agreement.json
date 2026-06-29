@@ -1,9 +1,12 @@
 {
   "id": "{{request.path.agreement_id}}",
-  "name": "Playground Agreement {{request.path.agreement_id}}",
-  "status": "Active",
+  "name": "{{parameters.agreementName}}",
+  "status": "{{parameters.status}}",
   "revision": 1,
-  "product": { "id": "PRD-1111-1111", "name": "Playground Product" },
+  "product": {
+    "id": "{{parameters.productId}}",
+    "name": "{{parameters.productName}}"
+  },
   "client": { "id": "ACC-1111-1111", "name": "Playground Client" },
   "seller": { "id": "ACC-2222-2222", "name": "Playground Seller" },
   "buyer": { "id": "ACC-3333-3333", "name": "Playground Buyer" },
