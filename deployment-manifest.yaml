@@ -26,6 +26,7 @@ env:
     name: SDK_EXTENSION_URL
   SdkOtelServiceName:
     name: SDK_OTEL_SERVICE_NAME
+    defaultValue: "Swo.Installation.Extension"
   SdkZitiWorkers:
     name: SDK_ZITI_WORKERS
     defaultValue: "4"
