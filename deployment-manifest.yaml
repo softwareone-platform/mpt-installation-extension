@@ -20,6 +20,8 @@ env:
   MptToolStorageType:
     name: MPT_TOOL_STORAGE_TYPE
     defaultValue: "airtable"
+  AppInsightsConnectionString:
+    name: SDK_APPLICATIONINSIGHTS_CONNECTION_STRING
   SdkExtensionId:
     name: SDK_EXTENSION_ID
   SdkExtensionUrl:
