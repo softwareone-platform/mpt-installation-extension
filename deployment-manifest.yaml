@@ -8,23 +8,27 @@ api:
 worker:
   enabled: false
 env:
-  productExtensionMapping:
+  ExtMptProductExtensionMapping:
     name: EXT_MPT_PRODUCT_EXTENSION_MAPPING
-  apiUrl:
+  mptPublicApiUrl:
     name: MPT_API_BASE_URL
-  extensionUrl:
-    name: SDK_EXTENSION_URL
-  extensionId:
-    name: SDK_EXTENSION_ID
-  toolStorageType:
+  MptToolStorageType:
     name: MPT_TOOL_STORAGE_TYPE
-  toolStorageAirtableBaseId:
+  MptToolStorageAirtableBaseId:
     name: MPT_TOOL_STORAGE_AIRTABLE_BASE_ID
-  toolStorageAirtableTableName:
+  MptToolStorageAirtableTableName:
     name: MPT_TOOL_STORAGE_AIRTABLE_TABLE_NAME
+  SdkExtensionUrl:
+    name: SDK_EXTENSION_URL
+  SdkExtensionId:
+    name: SDK_EXTENSION_ID
+  SdkZitiWorkers:
+    name: SDK_ZITI_WORKERS
+  SdkOtelServiceName:
+    name: SDK_OTEL_SERVICE_NAME
 secrets:
-  apiKey:
-    name: SDK_EXTENSION_API_KEY
-  toolStorageAirtableApiKey:
+  MptToolStorageAirtableApiKey:
     name: MPT_TOOL_STORAGE_AIRTABLE_API_KEY
+  SdkExtensionApiKey:
+    name: SDK_EXTENSION_API_KEY
 cronjobs: {}
