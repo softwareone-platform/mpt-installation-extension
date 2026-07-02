@@ -1,0 +1,30 @@
+owner: marketplace-team
+dbup:
+  enabled: false
+api:
+  enabled: true
+  hosts:
+    - mpt-platform-api.domain.global
+worker:
+  enabled: false
+env:
+  productExtensionMapping:
+    name: EXT_MPT_PRODUCT_EXTENSION_MAPPING
+  apiUrl:
+    name: MPT_API_BASE_URL
+  extensionUrl:
+    name: SDK_EXTENSION_URL
+  extensionId:
+    name: SDK_EXTENSION_ID
+  toolStorageType:
+    name: MPT_TOOL_STORAGE_TYPE
+  toolStorageAirtableBaseId:
+    name: MPT_TOOL_STORAGE_AIRTABLE_BASE_ID
+  toolStorageAirtableTableName:
+    name: MPT_TOOL_STORAGE_AIRTABLE_TABLE_NAME
+secrets:
+  apiKey:
+    name: SDK_EXTENSION_API_KEY
+  toolStorageAirtableApiKey:
+    name: MPT_TOOL_STORAGE_AIRTABLE_API_KEY
+cronjobs: {}

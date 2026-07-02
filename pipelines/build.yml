@@ -1,0 +1,25 @@
+trigger:
+  branches:
+    include:
+      - main
+      - release/*
+
+pool:
+  name: Standard-Linux
+
+resources:
+  repositories:
+    - repository: buildTemplates
+      type: git
+      name: MPT/ops-build-templates
+      ref: refs/heads/feature/build_template
+
+extends:
+  template: common-build/extends-py.yml@buildTemplates
+  parameters:
+    appName: mpt-extension-installation
+    components:
+      web-api:
+        name: Api
+        dockerArgs: --target prod
+    sbomWorkingDirectory: /backend
