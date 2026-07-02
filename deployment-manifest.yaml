@@ -12,20 +12,23 @@ env:
     name: EXT_MPT_PRODUCT_EXTENSION_MAPPING
   mptPublicApiUrl:
     name: MPT_API_BASE_URL
-  MptToolStorageType:
-    name: MPT_TOOL_STORAGE_TYPE
   MptToolStorageAirtableBaseId:
     name: MPT_TOOL_STORAGE_AIRTABLE_BASE_ID
   MptToolStorageAirtableTableName:
     name: MPT_TOOL_STORAGE_AIRTABLE_TABLE_NAME
-  SdkExtensionUrl:
-    name: SDK_EXTENSION_URL
+    defaultValue: "Migrations"
+  MptToolStorageType:
+    name: MPT_TOOL_STORAGE_TYPE
+    defaultValue: "airtable"
   SdkExtensionId:
     name: SDK_EXTENSION_ID
-  SdkZitiWorkers:
-    name: SDK_ZITI_WORKERS
+  SdkExtensionUrl:
+    name: SDK_EXTENSION_URL
   SdkOtelServiceName:
     name: SDK_OTEL_SERVICE_NAME
+  SdkZitiWorkers:
+    name: SDK_ZITI_WORKERS
+    defaultValue: "4"
 secrets:
   MptToolStorageAirtableApiKey:
     name: MPT_TOOL_STORAGE_AIRTABLE_API_KEY
