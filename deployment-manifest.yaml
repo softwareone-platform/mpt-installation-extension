@@ -3,6 +3,7 @@ dbup:
   enabled: false
 api:
   enabled: true
+  probesEnabled: false
   hosts:
     - mpt-platform-api.domain.global
 worker:
