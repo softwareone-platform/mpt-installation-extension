@@ -27,6 +27,9 @@ env:
     name: SDK_EXTENSION_ID
   SdkExtensionUrl:
     name: SDK_EXTENSION_URL
+  SdkObservabilityEnabled:
+    name: SDK_OBSERVABILITY_ENABLED
+    defaultValue: "false"
   SdkOtelServiceName:
     name: SDK_OTEL_SERVICE_NAME
     defaultValue: "Swo.Installation.Extension"
