@@ -1,7 +1,9 @@
+import asyncio
 from typing import cast, override
 
 from mpt_extension_sdk.pipeline import BasePipeline, BaseStep, EventBaseContext
 
+from mpt_installation_extension.notifications import notify_non_recoverable_failure
 from mpt_installation_extension.pipelines.context import (
     InstallationActionType,
     InstallationAgreementContext,
@@ -35,5 +37,6 @@ class AgreementInstallationPipeline(BasePipeline):
                 installation_ctx.agreement.id,
                 action.details,
             )
+            await asyncio.to_thread(notify_non_recoverable_failure, installation_ctx)
 
         installation_ctx.installation_state.handled = True

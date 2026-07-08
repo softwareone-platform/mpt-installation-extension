@@ -2,6 +2,7 @@ from dataclasses import dataclass, field, fields
 from enum import StrEnum
 from typing import Any, Self, override
 
+from mpt_extension_contrib.custom_notifications import NotificationsContextMixin
 from mpt_extension_sdk.context import ContextAdapter
 from mpt_extension_sdk.pipeline import AgreementContext
 
@@ -30,7 +31,9 @@ class InstallationState:
 
 
 @dataclass(kw_only=True)
-class InstallationAgreementContext(AgreementContext, ContextAdapter):
+class InstallationAgreementContext(  # type: ignore[misc]
+    NotificationsContextMixin, AgreementContext, ContextAdapter
+):
     """Agreement event context extended with the installation workflow state."""
 
     installation_state: InstallationState = field(default_factory=InstallationState)

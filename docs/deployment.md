@@ -15,6 +15,8 @@ Local setup instructions live in [docs/local-development.md](local-development.m
 | Environment Variable | Default | Example | Description |
 | --- | --- | --- | --- |
 | `EXT_MPT_PRODUCT_EXTENSION_MAPPING` | - | `{"PRD-1111-1111":["EXT-1111-1112"]}` | JSON object mapping Marketplace product ids to one or more required extension ids |
+| `EXT_MSTEAMS_WEBHOOK_URL` | - | `https://example.test/teams-webhook` | HTTPS Teams Workflows webhook URL used to notify non-recoverable installation failures; must be `https://`; the Teams channel is not registered when unset |
+| `EXT_MSTEAMS_NOTIFICATIONS_ENABLED` | `false` | `true` | Enables sending Teams notifications; when `false` the channel is registered but sends are skipped |
 | `SDK_EXTENSION_API_KEY` | - | `<extension-api-key>` | API key used by the SDK extension runtime |
 | `SDK_EXTENSION_ID` | - | `EXT-1111-1111` | Marketplace extension id used by the SDK runtime |
 | `SDK_EXTENSION_URL` | - | `http://devmock:8000` | Base URL where the SDK runtime reaches the extension service or local mock |
@@ -30,6 +32,7 @@ Example `.env` snippet:
 
 ```env
 EXT_MPT_PRODUCT_EXTENSION_MAPPING={"PRD-1111-1111":["EXT-1111-1112"]}
+EXT_MSTEAMS_NOTIFICATIONS_ENABLED=false
 SDK_EXTENSION_API_KEY=<extension-api-key>
 SDK_EXTENSION_ID=EXT-1111-1111
 SDK_EXTENSION_URL=http://devmock:8000
