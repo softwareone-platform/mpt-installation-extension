@@ -3,6 +3,7 @@ dbup:
   enabled: false
 api:
   enabled: true
+  image: mpt-extension-installation
   probesEnabled: false
   hosts:
     - mpt-platform-api.domain.global
