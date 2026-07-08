@@ -49,4 +49,5 @@ repos:
         args: ["--config-file=backend/pyproject.toml", "backend/mpt_installation_extension"]
         pass_filenames: false
         additional_dependencies:
+          - mpt-extension-contrib-custom-notifications[teams]==1.1.*
           - mpt-extension-sdk==6.4.*

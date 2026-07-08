@@ -1240,6 +1240,15 @@ wheels = [
 ]
 
 [[package]]
+name = "microsoft-teams-cards"
+version = "2.0.14"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/45/73/5e337bf6bde2803d75e5990fc11085d83e99f6184bbd5d6efa5614a26239/microsoft_teams_cards-2.0.14.tar.gz", hash = "sha256:9a6170e72e9207c508b6cb91b950b7785177fbd57adb781c99bc8756e15e8977", size = 28109, upload-time = "2026-07-08T00:18:26.086Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0b/e9/c22bec14a6f4e8d5e054c23f150012afbf1ef3acf4ee871fc885728eae92/microsoft_teams_cards-2.0.14-py3-none-any.whl", hash = "sha256:5e2eaaed534eab688c25c16111e0159d2946228c7c35315f92f22fff826a30c6", size = 29602, upload-time = "2026-07-08T00:18:32.732Z" },
+]
+
+[[package]]
 name = "mpt-api-client"
 version = "6.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1250,6 +1259,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a6/f0/6d77d6235801223cfa6a82d13e208469cf12960f4777b841616f64238462/mpt_api_client-6.3.1.tar.gz", hash = "sha256:642f5088c4b2f9608fb70fa9078856423a9096fa118eeede60c6ae9bbb7200f1", size = 65853, upload-time = "2026-06-25T16:05:35.595Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9c/8d/a3ae1ad7836584e4caacae27816666c55858415f2a80390cefa4264be679/mpt_api_client-6.3.1-py3-none-any.whl", hash = "sha256:87cef1feb7d272dcda619818124605381861a633e442334316181ebb36ba18f7", size = 148484, upload-time = "2026-06-25T16:05:34.462Z" },
+]
+
+[[package]]
+name = "mpt-extension-contrib-custom-notifications"
+version = "1.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a9/b9/d2eafe71b021c254f8f0c505a1b40994215f94eb08153618bed1af83bf91/mpt_extension_contrib_custom_notifications-1.1.0.tar.gz", hash = "sha256:b3a0808d7f8c8a8f4b2224698b7467e9b7d99eea1e8dc09966c420a6e5cbf18b", size = 12691, upload-time = "2026-06-30T13:03:09.12Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/86/6d/b0d10b37d0f83d671353e39df41ca83ebf1e1600627b9247d1f7f19576df/mpt_extension_contrib_custom_notifications-1.1.0-py3-none-any.whl", hash = "sha256:3f4e1a1596c6189031a1c80cad13a662fb274a80674d32492a3be11d5deddb7e", size = 17049, upload-time = "2026-06-30T13:03:08.283Z" },
+]
+
+[package.optional-dependencies]
+teams = [
+    { name = "httpx" },
+    { name = "microsoft-teams-cards" },
 ]
 
 [[package]]
@@ -1279,6 +1303,7 @@ name = "mpt-installation-extension"
 version = "6.0.0"
 source = { editable = "." }
 dependencies = [
+    { name = "mpt-extension-contrib-custom-notifications", extra = ["teams"] },
     { name = "mpt-extension-sdk" },
     { name = "mpt-tool" },
 ]
@@ -1302,6 +1327,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "mpt-extension-contrib-custom-notifications", extras = ["teams"], specifier = "==1.1.*" },
     { name = "mpt-extension-sdk", specifier = "==6.4.*" },
     { name = "mpt-tool", specifier = "==6.0.*" },
 ]

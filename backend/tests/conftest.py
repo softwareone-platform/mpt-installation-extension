@@ -37,7 +37,9 @@ def agreement_context_factory(mocker):
                 product_extension_mapping={"PRD-1111": ["EXT-1111", "EXT-2222"]},
             ),
             runtime_settings=mocker.Mock(
-                spec=RuntimeSettings, mpt_api_base_url="https://api.example.test"
+                spec=RuntimeSettings,
+                mpt_api_base_url="https://api.example.test",
+                extension_id="EXT-1111-1111",
             ),
             agreement=Agreement(
                 id="AGR-1",
