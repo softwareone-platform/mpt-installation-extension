@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Self, override
 
-from mpt_extension_contrib.custom_notifications.channels.teams import TeamsSettings
+from mpt_extension_contrib.custom_notifications.channels.teams_cards import TeamsSettings
 from mpt_extension_sdk.settings.extension import BaseExtensionSettings
 
 

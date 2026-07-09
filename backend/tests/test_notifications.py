@@ -4,13 +4,20 @@ import datetime as dt
 import httpx
 import pytest
 from mpt_extension_contrib.custom_notifications import NotificationRegistry
-from mpt_extension_contrib.custom_notifications.channels.teams import TeamsNotifications
+from mpt_extension_contrib.custom_notifications.channels.teams_async import AsyncTeamsNotifier
 
 from mpt_installation_extension.notifications import notify_non_recoverable_failure
 from mpt_installation_extension.pipelines.context import (
     InstallationAction,
     InstallationActionType,
 )
+
+
+class StubTeamsNotifier(AsyncTeamsNotifier):
+    """Registry lookup is nominal, so the test double must subclass the notifier."""
+
+    def __init__(self, send_error_mock):
+        self.send_error = send_error_mock
 
 
 @pytest.fixture
@@ -44,14 +51,14 @@ def failure_context(agreement_context_factory):
 
 
 @pytest.fixture
-def teams_mock(mocker):
-    return mocker.Mock(spec_set=TeamsNotifications)
+def send_error_mock(mocker):
+    return mocker.AsyncMock()
 
 
 @pytest.fixture
-def teams_registry(teams_mock):
+def teams_registry(send_error_mock):
     registry = NotificationRegistry()
-    registry.register("teams", teams_mock, override=True)
+    registry.register("teams_async", StubTeamsNotifier(send_error_mock), override=True)
     return registry
 
 
@@ -61,22 +68,20 @@ def notifying_context(failure_context, teams_registry):
     return failure_context
 
 
-def test_sends_error_card_message(notifying_context, teams_mock, mocker):
-    notify_non_recoverable_failure(notifying_context)  # act
+async def test_sends_error_card_message(notifying_context, send_error_mock, mocker):
+    await notify_non_recoverable_failure(notifying_context)  # act
 
-    teams_mock.send_error.assert_has_calls([
-        mocker.call(
-            "Extension installation failed permanently",
-            "One or more extension installations failed permanently",
-            facts=mocker.ANY,
-        ),
-    ])
+    send_error_mock.assert_awaited_once_with(
+        "Extension installation failed permanently",
+        "One or more extension installations failed permanently",
+        facts=mocker.ANY,
+    )
 
 
-def test_sends_error_card_facts(notifying_context, teams_mock):
-    notify_non_recoverable_failure(notifying_context)  # act
+async def test_sends_error_card_facts(notifying_context, send_error_mock):
+    await notify_non_recoverable_failure(notifying_context)  # act
 
-    facts = teams_mock.send_error.call_args.kwargs["facts"]
+    facts = send_error_mock.await_args.kwargs["facts"]
     timestamp = facts.entries.pop("Timestamp")
     assert facts.title == "Failure details"
     assert facts.entries == {
@@ -90,35 +95,47 @@ def test_sends_error_card_facts(notifying_context, teams_mock):
     assert dt.datetime.fromisoformat(timestamp).tzinfo is not None
 
 
-def test_warns_when_delivery_fails(notifying_context, teams_mock):
-    teams_mock.send_error.side_effect = httpx.ConnectTimeout("timed out")
+async def test_warns_when_delivery_fails(notifying_context, send_error_mock):
+    send_error_mock.side_effect = httpx.ConnectTimeout("timed out")
 
-    notify_non_recoverable_failure(notifying_context)  # act
+    await notify_non_recoverable_failure(notifying_context)  # act
 
     notifying_context.logger.warning.assert_called_once()
 
 
-def test_warns_when_teams_not_configured(failure_context):
-    notify_non_recoverable_failure(failure_context)  # act
+async def test_warns_when_teams_not_configured(failure_context):
+    await notify_non_recoverable_failure(failure_context)  # act
 
     failure_context.logger.warning.assert_called_once()
 
 
-def test_warns_when_webhook_is_not_https(failure_context):
+async def test_warns_when_enabled_without_webhook(failure_context):
+    failure_context.ext_settings = dataclasses.replace(
+        failure_context.ext_settings,
+        teams_notifications_enabled=True,
+    )
+
+    await notify_non_recoverable_failure(failure_context)  # act
+
+    failure_context.logger.warning.assert_called_once()
+
+
+async def test_warns_when_webhook_is_not_https(failure_context):
     failure_context.ext_settings = dataclasses.replace(
         failure_context.ext_settings,
         teams_webhook_url="<fake-msteams-webhook-url>",
+        teams_notifications_enabled=True,
     )
 
-    notify_non_recoverable_failure(failure_context)  # act
+    await notify_non_recoverable_failure(failure_context)  # act
 
     failure_context.logger.warning.assert_called_once()
 
 
-def test_noop_without_action(agreement_context_factory, teams_mock, teams_registry):
+async def test_noop_without_action(agreement_context_factory, send_error_mock, teams_registry):
     ctx = agreement_context_factory(context_type="installation")
     ctx.notifications = teams_registry
 
-    notify_non_recoverable_failure(ctx)  # act
+    await notify_non_recoverable_failure(ctx)  # act
 
-    teams_mock.send_error.assert_not_called()
+    send_error_mock.assert_not_awaited()
