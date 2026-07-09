@@ -37,7 +37,7 @@ When architecture details become relevant, document:
 
 Recoverable Marketplace failures are converted into `DeferStepError`; the SDK pipeline/router contract then defers the event for retry.
 
-Non-recoverable Marketplace failures do not fail the event. The step records a single aggregated `InstallationAction` on `ctx.installation_state.action`. Pipeline hooks handle that action after success or before defer by logging that a non-recoverable failure notification is pending. The actual Teams notification implementation is intentionally outside this change.
+Non-recoverable Marketplace failures do not fail the event. The step records a single aggregated `InstallationAction` on `ctx.installation_state.action`. Pipeline hooks handle that action after success or before defer by logging the failure and sending a Microsoft Teams notification through the shared notification package. See [external-integrations.md](external-integrations.md) for the notification transport and its configuration.
 
 ## Boundaries
 

@@ -84,6 +84,7 @@ class InstallAgreementExtensionsStep(BaseStep):
                 target=InstallationActionType.NOTIFY_NON_RECOVERABLE_FAILURE,
                 message="One or more extension installations failed permanently",
                 details={
+                    "extension_id": ctx.runtime_settings.extension_id,
                     "agreement_id": ctx.agreement.id,
                     "product_id": ctx.agreement.product.id,
                     "client_id": ctx.agreement.client.id,
