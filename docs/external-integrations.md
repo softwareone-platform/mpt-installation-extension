@@ -24,7 +24,7 @@ The notification is an Adaptive Card posted to a Teams Workflows webhook. It con
 
 Configuration:
 
-- `EXT_MSTEAMS_WEBHOOK_URL`: HTTPS webhook URL. When unset or not an `https://` URL, the hook logs a warning instead of sending.
-- `EXT_MSTEAMS_NOTIFICATIONS_ENABLED`: when `false` (default), the channel skips sends without failing the flow.
+- `EXT_MSTEAMS_NOTIFICATIONS_ENABLED`: master switch, `false` by default. When disabled, the Teams channel is not registered and the hook logs a warning instead of sending.
+- `EXT_MSTEAMS_WEBHOOK_URL`: HTTPS webhook URL, required when notifications are enabled. When missing or not an `https://` URL, the hook logs a warning instead of sending.
 
-Webhook delivery errors are logged by the shared package and never interrupt the installation pipeline.
+Delivery is asynchronous (the shared package posts through `httpx.AsyncClient`); webhook delivery errors are logged and never interrupt the installation pipeline.
