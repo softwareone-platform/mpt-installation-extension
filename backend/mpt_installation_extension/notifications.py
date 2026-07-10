@@ -2,19 +2,20 @@ import datetime as dt
 from typing import Any
 
 import httpx
-from mpt_extension_contrib.custom_notifications.channels.teams import FactsSection, TeamsNotifier
+from mpt_extension_contrib.custom_notifications.channels.teams_async import AsyncTeamsNotifier
+from mpt_extension_contrib.custom_notifications.channels.teams_cards import FactsSection
 
 from mpt_installation_extension.pipelines.context import InstallationAgreementContext
 
 
-def notify_non_recoverable_failure(ctx: InstallationAgreementContext) -> None:
+async def notify_non_recoverable_failure(ctx: InstallationAgreementContext) -> None:
     """Send a Teams notification for a non-recoverable installation failure."""
     action = ctx.installation_state.action
     if action is None:
         return
 
     try:
-        teams = ctx.notifications.get(TeamsNotifier)  # type: ignore[type-abstract]
+        teams = ctx.notifications.get(AsyncTeamsNotifier)
     except (LookupError, ValueError) as error:
         ctx.logger.warning(
             "Teams notifications are not available; skipping non-recoverable "
@@ -25,7 +26,7 @@ def notify_non_recoverable_failure(ctx: InstallationAgreementContext) -> None:
         return
 
     try:
-        teams.send_error(
+        await teams.send_error(
             "Extension installation failed permanently",
             action.message,
             facts=_build_facts(action.details),

@@ -1263,11 +1263,11 @@ wheels = [
 
 [[package]]
 name = "mpt-extension-contrib-custom-notifications"
-version = "1.1.0"
+version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a9/b9/d2eafe71b021c254f8f0c505a1b40994215f94eb08153618bed1af83bf91/mpt_extension_contrib_custom_notifications-1.1.0.tar.gz", hash = "sha256:b3a0808d7f8c8a8f4b2224698b7467e9b7d99eea1e8dc09966c420a6e5cbf18b", size = 12691, upload-time = "2026-06-30T13:03:09.12Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2b/72/d248e6fe39ee0d2385c670eaf59c66b58bee87225bf8def8685df77b6111/mpt_extension_contrib_custom_notifications-1.2.0.tar.gz", hash = "sha256:527789f1455a04c3dc84365e99419bc6b080b9b158fae23d84d3b0daa07b6190", size = 14760, upload-time = "2026-07-09T14:05:43.725Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/86/6d/b0d10b37d0f83d671353e39df41ca83ebf1e1600627b9247d1f7f19576df/mpt_extension_contrib_custom_notifications-1.1.0-py3-none-any.whl", hash = "sha256:3f4e1a1596c6189031a1c80cad13a662fb274a80674d32492a3be11d5deddb7e", size = 17049, upload-time = "2026-06-30T13:03:08.283Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/0c/212419dd26ae9e7cb852eb7b3a390065384006a3fceb8283fdaaa9bb6b29/mpt_extension_contrib_custom_notifications-1.2.0-py3-none-any.whl", hash = "sha256:708538f178b9ad71b0ded8a97d5ddc3f332e5a39fff6991db4db725c8394ca2b", size = 21775, upload-time = "2026-07-09T14:05:42.852Z" },
 ]
 
 [package.optional-dependencies]
@@ -1327,7 +1327,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "mpt-extension-contrib-custom-notifications", extras = ["teams"], specifier = "==1.1.*" },
+    { name = "mpt-extension-contrib-custom-notifications", extras = ["teams"], specifier = "==1.2.*" },
     { name = "mpt-extension-sdk", specifier = "==6.4.*" },
     { name = "mpt-tool", specifier = "==6.0.*" },
 ]
