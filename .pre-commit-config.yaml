@@ -50,4 +50,4 @@ repos:
         pass_filenames: false
         additional_dependencies:
           - mpt-extension-contrib-custom-notifications[teams]==1.2.*
-          - mpt-extension-sdk==6.4.*
+          - mpt-extension-sdk==6.5.*
