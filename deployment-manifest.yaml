@@ -3,6 +3,7 @@ dbup:
   enabled: false
 api:
   enabled: true
+  image: mpt-extension-installation
   probesEnabled: false
   hosts:
     - mpt-platform-api.domain.global
@@ -11,6 +12,9 @@ worker:
 env:
   ExtMptProductExtensionMapping:
     name: EXT_MPT_PRODUCT_EXTENSION_MAPPING
+  ExtMsteamsNotificationsEnabled:
+    name: EXT_MSTEAMS_NOTIFICATIONS_ENABLED
+    defaultValue: "false"
   mptPublicApiUrl:
     name: MPT_API_BASE_URL
   MptToolStorageAirtableBaseId:
@@ -37,6 +41,8 @@ env:
     name: SDK_ZITI_WORKERS
     defaultValue: "4"
 secrets:
+  ExtMsteamsWebhookUrl:
+    name: EXT_MSTEAMS_WEBHOOK_URL
   MptToolStorageAirtableApiKey:
     name: MPT_TOOL_STORAGE_AIRTABLE_API_KEY
   SdkExtensionApiKey:
