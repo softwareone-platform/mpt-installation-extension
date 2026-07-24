@@ -1,4 +1,7 @@
-from mpt_installation_extension.settings import ExtensionSettings
+import pytest
+from mpt_extension_sdk.errors.runtime import ConfigError
+
+from mpt_installation_extension.settings import ExtensionSettings, MigrationExtensionSettings
 
 
 def test_loads_product_extension_mapping():
@@ -31,3 +34,18 @@ def test_teams_settings_default_to_disabled(monkeypatch):
 
     assert result.teams_webhook_url is None
     assert result.teams_notifications_enabled is False
+
+
+def test_migration_settings_loads_ops_account(monkeypatch):
+    monkeypatch.setenv("EXT_OPERATIONS_ACCOUNT_ID", "ACC-OPS")
+
+    result = MigrationExtensionSettings.load()
+
+    assert result.operations_account_id == "ACC-OPS"
+
+
+def test_migration_settings_requires_ops_account(monkeypatch):
+    monkeypatch.delenv("EXT_OPERATIONS_ACCOUNT_ID", raising=False)
+
+    with pytest.raises(ConfigError, match="EXT_OPERATIONS_ACCOUNT_ID"):
+        MigrationExtensionSettings.load()
