@@ -9,15 +9,24 @@ Shared migration knowledge lives in:
 
 If the repository does not yet have repository-specific migration rules, keep this file short and rely on the shared migration knowledge above.
 
-## What To Add Here
+## Migration Files
 
-Add repository-specific migration details only when they exist, for example:
+Data migrations live in [`backend/migrations/`](../backend/migrations) and use the repository make targets (`make migrate-new-data`, `make migrate-data`, `make migrate-list`, `make migrate-check`). See the shared migration knowledge for the tooling and the storage backends selectable via `MPT_TOOL_STORAGE_TYPE`.
 
-- where migration files live
-- which migration commands are actually used in this repository
-- required execution order or rollout rules
-- operational constraints or safety checks
-- differences from the shared migration knowledge
+## Installing Missing Extensions
+
+The extension installs vendor extensions reactively when an agreement becomes `Active`. That flow only acts going forward, so clients with **already-active** agreements do not receive an extension that is added to `EXT_MPT_PRODUCT_EXTENSION_MAPPING` later. A data migration closes that gap for the accounts that are missing it.
+
+### Adding one
+
+When a new extension or product is added:
+
+1. Update `EXT_MPT_PRODUCT_EXTENSION_MAPPING` so the reactive flow covers future activations. The product/extension ids differ per environment, so the migration reads this mapping instead of hardcoding ids.
+2. Scaffold a migration: `make migrate-new-data name=install_missing_extensions`.
+3. In the generated file, reconcile the current mapping from settings (see the existing migration): build `ExtensionInstallationCreatorService` from `self.mpt_api_service` and call `create_missing_installations(get_extension_settings().product_extension_mapping)`.
+4. Deploy. `make migrate-data` runs the pending migrations.
+
+The migration installs each configured extension on every account that has an `Active` agreement of the corresponding product and lacks the installation. It is idempotent (a create returning `409 CONFLICT` counts as already installed), and it raises (so it can be re-run) if any installation fails permanently. It requires `MPT_API_BASE_URL` and `MPT_API_TOKEN` in the execution environment, with permission to create installations.
 
 ## Documentation Rule
 

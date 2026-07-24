@@ -1,8 +1,7 @@
-from collections.abc import Callable
 from http import HTTPStatus
 
 import pytest
-from mpt_api_client.exceptions import MPTAPIError, MPTError, MPTHttpError, MPTMaxRetryError
+from mpt_api_client.exceptions import MPTError, MPTHttpError, MPTMaxRetryError
 from mpt_extension_sdk.errors.pipeline import DeferError
 from mpt_extension_sdk.errors.step import DeferStepError
 from mpt_extension_sdk.models import Installation
@@ -34,55 +33,24 @@ async def test_pipeline_creates_installations(installation_context, mocker, pipe
             mocker.Mock(spec_set=["id"], id="MOD-2"),
         ],
     )
-    installation_service.exists_for_account = mocker.AsyncMock(return_value=False)
     extension_service.get_by_id = mocker.AsyncMock(return_value=extension_response)
-    installation_service.create = mocker.AsyncMock(
-        side_effect=created_installations.append,
-    )
+    installation_service.create = mocker.AsyncMock(side_effect=created_installations.append)
 
     await pipeline.execute(installation_context)  # act
 
-    assert installation_service.exists_for_account.await_args_list == [
-        mocker.call(extension_id="EXT-1111", account_id="ACC-CLIENT"),
-        mocker.call(extension_id="EXT-2222", account_id="ACC-CLIENT"),
-    ]
+    assert installation_service.create.await_count == 2
     assert isinstance(created_installations[0], Installation)
     assert [module.id for module in created_installations[0].modules] == ["MOD-1", "MOD-2"]
 
 
-async def test_pipeline_skips_existing_installations(installation_context, mocker, pipeline):
+async def test_pipeline_tolerates_existing(installation_context, make_mpt_error, mocker, pipeline):
     installation_service = installation_context.mpt_api_service.installations
     extension_service = installation_context.mpt_api_service.extensions
-    installation_service.exists_for_account = mocker.AsyncMock(return_value=True)
-    extension_service.get_by_id = mocker.AsyncMock()
-    installation_service.create = mocker.AsyncMock()
-
-    await pipeline.execute(installation_context)  # act
-
-    extension_service.get_by_id.assert_not_awaited()
-    installation_service.create.assert_not_awaited()
-
-
-async def test_pipeline_skips_concurrent_existing(installation_context, mocker, pipeline):
-    installation_service = installation_context.mpt_api_service.installations
-    extension_service = installation_context.mpt_api_service.extensions
-    extension_response = mocker.Mock(
-        spec_set=["modules"],
-        modules=[mocker.Mock(spec_set=["id"], id="MOD-1")],
+    extension_service.get_by_id = mocker.AsyncMock(
+        return_value=mocker.Mock(spec_set=["modules"], modules=[])
     )
-    exists_for_account_mock = mocker.AsyncMock()
-    exists_for_account_mock.return_value = False
-    installation_service.exists_for_account = exists_for_account_mock
-    extension_service.get_by_id = mocker.AsyncMock(return_value=extension_response)
     installation_service.create = mocker.AsyncMock(
-        side_effect=[
-            MPTAPIError(
-                HTTPStatus.CONFLICT,
-                "Conflict",
-                {"status": str(HTTPStatus.CONFLICT), "title": "Conflict"},
-            ),
-            None,
-        ],
+        side_effect=make_mpt_error(HTTPStatus.CONFLICT, "Conflict")
     )
 
     await pipeline.execute(installation_context)  # act
@@ -92,15 +60,12 @@ async def test_pipeline_skips_concurrent_existing(installation_context, mocker, 
 
 
 async def test_pipeline_defers_after_http_error(installation_context, mocker, pipeline):
-    installation_service = installation_context.mpt_api_service.installations
     extension_service = installation_context.mpt_api_service.extensions
-    installation_service.exists_for_account = mocker.AsyncMock(return_value=False)
     extension_service.get_by_id = mocker.AsyncMock(
         side_effect=MPTHttpError(
             HTTPStatus.SERVICE_UNAVAILABLE, "Service unavailable", "unavailable"
         ),
     )
-    installation_service.create = mocker.AsyncMock()
 
     with pytest.raises(DeferError) as error:
         await pipeline.execute(installation_context)
@@ -109,13 +74,10 @@ async def test_pipeline_defers_after_http_error(installation_context, mocker, pi
 
 
 async def test_pipeline_defers_after_max_retry_error(installation_context, mocker, pipeline):
-    installation_service = installation_context.mpt_api_service.installations
     extension_service = installation_context.mpt_api_service.extensions
-    installation_service.exists_for_account = mocker.AsyncMock(return_value=False)
     extension_service.get_by_id = mocker.AsyncMock(
         side_effect=MPTMaxRetryError("Marketplace request", 3),
     )
-    installation_service.create = mocker.AsyncMock()
 
     with pytest.raises(DeferError) as error:
         await pipeline.execute(installation_context)
@@ -123,19 +85,14 @@ async def test_pipeline_defers_after_max_retry_error(installation_context, mocke
     assert error.value.delay_seconds == DeferStepError().delay_seconds
 
 
-async def test_pipeline_records_failure_action(installation_context, mocker, pipeline):
+async def test_pipeline_records_failure_action(
+    installation_context, make_mpt_error, mocker, pipeline
+):
     ctx = installation_context
-    installation_service = installation_context.mpt_api_service.installations
     extension_service = installation_context.mpt_api_service.extensions
-    installation_service.exists_for_account = mocker.AsyncMock(return_value=False)
     extension_service.get_by_id = mocker.AsyncMock(
-        side_effect=MPTAPIError(
-            HTTPStatus.NOT_FOUND,
-            "Not found",
-            {"status": str(HTTPStatus.NOT_FOUND), "title": "Not found"},
-        ),
+        side_effect=make_mpt_error(HTTPStatus.NOT_FOUND, "Not found"),
     )
-    installation_service.create = mocker.AsyncMock()
 
     await pipeline.execute(ctx)  # act
 
@@ -162,9 +119,7 @@ async def test_pipeline_records_failure_action(installation_context, mocker, pip
 
 async def test_pipeline_records_action_and_defers(installation_context, mocker, pipeline):
     ctx = installation_context
-    installation_service = installation_context.mpt_api_service.installations
     extension_service = installation_context.mpt_api_service.extensions
-    installation_service.exists_for_account = mocker.AsyncMock(return_value=False)
     extension_service.get_by_id = mocker.AsyncMock(
         side_effect=[
             MPTError("invalid extension configuration"),
@@ -175,7 +130,6 @@ async def test_pipeline_records_action_and_defers(installation_context, mocker, 
             ),
         ],
     )
-    installation_service.create = mocker.AsyncMock()
 
     with pytest.raises(DeferError):
         await pipeline.execute(ctx)
@@ -195,13 +149,8 @@ async def test_pipeline_records_action_and_defers(installation_context, mocker, 
 
 
 async def test_pipeline_raises_unexpected_error(installation_context, mocker, pipeline):
-    installation_service = installation_context.mpt_api_service.installations
     extension_service = installation_context.mpt_api_service.extensions
-    installation_service.exists_for_account = mocker.AsyncMock(return_value=False)
-    extension_service.get_by_id = mocker.AsyncMock(
-        side_effect=RuntimeError("broken"),
-    )
-    installation_service.create = mocker.AsyncMock()
+    extension_service.get_by_id = mocker.AsyncMock(side_effect=RuntimeError("broken"))
 
     with pytest.raises(RuntimeError, match="broken"):
         await pipeline.execute(installation_context)
@@ -209,12 +158,9 @@ async def test_pipeline_raises_unexpected_error(installation_context, mocker, pi
 
 @pytest.fixture
 def failing_installation_context(installation_context, mocker):
-    installation_service = installation_context.mpt_api_service.installations
-    installation_service.exists_for_account = mocker.AsyncMock(return_value=False, spec=Callable)
     installation_context.mpt_api_service.extensions.get_by_id = mocker.AsyncMock(
         side_effect=MPTError("invalid"),
     )
-    installation_service.create = mocker.AsyncMock()
     return installation_context
 
 
@@ -243,13 +189,8 @@ async def test_pipeline_notifies_once(failing_installation_context, notify_mock,
 
 async def test_pipeline_handles_action_once(installation_context, mocker, pipeline):
     ctx = installation_context
-    installation_service = installation_context.mpt_api_service.installations
     extension_service = installation_context.mpt_api_service.extensions
-    installation_service.exists_for_account = mocker.AsyncMock(return_value=False)
-    extension_service.get_by_id = mocker.AsyncMock(
-        side_effect=MPTError("invalid"),
-    )
-    installation_service.create = mocker.AsyncMock()
+    extension_service.get_by_id = mocker.AsyncMock(side_effect=MPTError("invalid"))
     await pipeline.execute(ctx)
 
     await pipeline.on_step_succeeded(pipeline.steps[0], ctx)  # act
@@ -262,4 +203,4 @@ async def test_pipeline_skips_without_config(agreement_context_factory, pipeline
 
     await pipeline.execute(ctx)  # act
 
-    assert ctx.mpt_api_service.installations.exists_for_account.call_count == 0
+    assert ctx.mpt_api_service.installations.create.call_count == 0

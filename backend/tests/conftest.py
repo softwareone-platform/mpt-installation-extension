@@ -2,6 +2,7 @@ import logging
 import os
 
 import pytest
+from mpt_api_client.exceptions import MPTAPIError
 from mpt_extension_sdk.models import Account, Agreement, Licensee, Product
 from mpt_extension_sdk.pipeline import AgreementContext, EventMetadata
 from mpt_extension_sdk.settings.runtime import RuntimeSettings
@@ -10,6 +11,15 @@ from mpt_installation_extension.pipelines.context import InstallationAgreementCo
 from mpt_installation_extension.settings import ExtensionSettings
 
 PRODUCT_EXTENSION_MAPPING = '{"PRD-1111":["EXT-1111","EXT-2222"]}'
+
+
+@pytest.fixture
+def make_mpt_error():
+    def factory(status, title):
+        return MPTAPIError(status, title, {"status": str(status), "title": title})
+
+    return factory
+
 
 os.environ.setdefault("EXT_MPT_PRODUCT_EXTENSION_MAPPING", PRODUCT_EXTENSION_MAPPING)
 

@@ -1,12 +1,10 @@
 import asyncio
 from collections.abc import Sequence
 from dataclasses import dataclass
-from http import HTTPStatus
 from typing import Protocol, TypeVar, cast, override
 
-from mpt_api_client.exceptions import MPTError, MPTHttpError
+from mpt_api_client.exceptions import MPTError
 from mpt_extension_sdk.errors.step import DeferStepError, SkipStepError
-from mpt_extension_sdk.models import Installation, InstallationReference
 from mpt_extension_sdk.pipeline import BaseStep
 
 from mpt_installation_extension.pipelines.context import (
@@ -17,6 +15,9 @@ from mpt_installation_extension.pipelines.context import (
 from mpt_installation_extension.pipelines.errors import (
     RecoverableInstallationError,
     is_deferrable_error,
+)
+from mpt_installation_extension.services.extension_installation import (
+    ExtensionInstallationCreatorService,
 )
 
 _OutcomeT = TypeVar("_OutcomeT")
@@ -107,43 +108,6 @@ class InstallAgreementExtensionsStep(BaseStep):
         if unexpected_errors:
             raise unexpected_errors[0]
 
-    async def _create_installation(
-        self, ctx: InstallationAgreementContext, extension_id: str
-    ) -> InstallationFailure | None:
-        try:
-            extension = await ctx.mpt_api_service.extensions.get_by_id(extension_id)
-        except MPTError as error:
-            return self._handle_mpt_error(extension_id, error)
-
-        installation = Installation(
-            account=InstallationReference(id=ctx.agreement.client.id),
-            extension=InstallationReference(id=extension_id),
-            modules=[
-                InstallationReference(id=cast(str, module.id)) for module in extension.modules
-            ],
-        )
-        try:
-            await ctx.mpt_api_service.installations.create(installation)
-        except MPTError as error:
-            if not (isinstance(error, MPTHttpError) and error.status_code == HTTPStatus.CONFLICT):
-                return self._handle_mpt_error(extension_id, error)
-            ctx.logger.info(
-                "Skipping extension installation for agreement %s, account %s, "
-                "extension %s because an installation already exists",
-                ctx.agreement.id,
-                ctx.agreement.client.id,
-                extension_id,
-            )
-            return None
-
-        ctx.logger.info(
-            "Created extension installation for agreement %s, account %s, extension %s",
-            ctx.agreement.id,
-            ctx.agreement.client.id,
-            extension_id,
-        )
-        return None
-
     def _get_extension_ids(
         self, ctx: InstallationAgreementContext, product_id: str
     ) -> tuple[str, ...]:
@@ -165,21 +129,11 @@ class InstallAgreementExtensionsStep(BaseStep):
     async def _install_extension(
         self, ctx: InstallationAgreementContext, extension_id: str
     ) -> InstallationFailure | None:
+        service = ExtensionInstallationCreatorService(ctx.mpt_api_service)
         try:
-            installation_exists = await ctx.mpt_api_service.installations.exists_for_account(
-                extension_id=extension_id, account_id=ctx.agreement.client.id
+            await service.create_installation(
+                account_id=ctx.agreement.client.id, extension_id=extension_id
             )
         except MPTError as error:
             return self._handle_mpt_error(extension_id, error)
-
-        if installation_exists:
-            ctx.logger.info(
-                "Skipping extension installation for agreement %s, account %s, "
-                "extension %s because an installation already exists",
-                ctx.agreement.id,
-                ctx.agreement.client.id,
-                extension_id,
-            )
-            return None
-
-        return await self._create_installation(ctx, extension_id)
+        return None
