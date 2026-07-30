@@ -44,6 +44,7 @@ FROM base AS prod
 
 COPY --from=build /opt/venv /opt/venv
 COPY --from=build /extension/mpt_installation_extension ./mpt_installation_extension
+COPY --from=build /extension/migrations ./migrations
 COPY --from=frontend-build /static ./static
 
 RUN groupadd -r appuser && useradd -r -g appuser -m -d /home/appuser appuser && \
