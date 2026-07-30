@@ -34,7 +34,7 @@ When a new extension or product is added:
 1. Update `EXT_MPT_PRODUCT_EXTENSION_MAPPING` so the reactive flow covers future activations. The product/extension ids differ per environment, so the migration reads this mapping instead of hardcoding ids.
 2. Scaffold a migration: `make migrate-new-data name=install_missing_extensions`.
 3. In the generated file, reconcile the current mapping (see the existing migration): use `MPTAPIServiceMixin.account_scoped_service`, build `ExtensionInstallationCreatorService`, and call `create_missing_installations(get_migration_settings().product_extension_mapping)`.
-4. Deploy. `make migrate-data` runs the pending migrations.
+4. Deploy. `make migrate-data` runs the pending migrations. On deployment they run as jobs, gated by the `migrations.data` and `migrations.schema` toggles in [`deployment-manifest.yaml`](../deployment-manifest.yaml); both must be `enabled` for the migrations to run.
 
 For each configured extension the migration first lists the accounts that already have it (`installations` filtered by `extension.id`) and only creates the installation for accounts with an `Active` agreement that are missing it — avoiding a create attempt per already-installed account. Creation stays idempotent (a `409 CONFLICT` counts as already installed, as a safety net) and concurrency is bounded. Failures — a permanent per-account error, or an extension that cannot be resolved — do not abort the run: they are aggregated and logged at `error` level, and the migration still completes.
 
