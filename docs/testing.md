@@ -16,8 +16,11 @@ The current backend test scope covers:
 - extension settings loading for product-to-extension mappings
 - agreement activation event router registration
 - extension installation creation for configured product mappings
-- idempotent skips when an account already has the extension installed
+- idempotent handling of existing installations via `409 CONFLICT`
 - partial API failure handling while processing multiple configured extensions
+- the installation creator service, including bulk reconciliation across accounts
+- the agreement query service resolving active-agreement accounts for a product
+- the migration mixin that builds the MPT API service from the environment
 
 ## Commands
 
