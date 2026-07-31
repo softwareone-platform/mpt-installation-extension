@@ -38,6 +38,11 @@ Repository command mapping:
 - `make check` runs `ruff format --check`, `ruff check`, `flake8`, `mypy`, and `uv lock --check`
 - `make check-all` runs both checks and tests
 
+The default `all` scope skips frontend checks, tests, and builds while the
+frontend is parked (no modules under `frontend/src/modules`); see
+[`make/common.mk`](../make/common.mk). Use `scope=frontend` to run the frontend
+commands explicitly.
+
 The CI workflow in [`.github/workflows/pr-build-merge.yml`](../.github/workflows/pr-build-merge.yml) uses the same `make build` and `make check-all` flow.
 
 ## Pytest Configuration
