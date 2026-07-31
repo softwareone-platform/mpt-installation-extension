@@ -43,6 +43,24 @@ async def test_pipeline_creates_installations(installation_context, mocker, pipe
     assert [module.id for module in created_installations[0].modules] == ["MOD-1", "MOD-2"]
 
 
+async def test_pipeline_shares_one_creator_service(installation_context, mocker, pipeline):
+    service_cls = mocker.patch(
+        "mpt_installation_extension.pipelines.steps.install_agreement_extensions."
+        "ExtensionInstallationCreatorService",
+    )
+    service_cls.return_value.create_installation = mocker.AsyncMock()
+
+    await pipeline.execute(installation_context)  # act
+
+    # Two extensions are configured, but a single service (and semaphore) is shared.
+    assert service_cls.call_count == 1
+    create_installation = service_cls.return_value.create_installation
+    installed_extension_ids = sorted(
+        call.kwargs["extension_id"] for call in create_installation.await_args_list
+    )
+    assert installed_extension_ids == ["EXT-1111", "EXT-2222"]
+
+
 async def test_pipeline_tolerates_existing(installation_context, make_mpt_error, mocker, pipeline):
     installation_service = installation_context.mpt_api_service.installations
     extension_service = installation_context.mpt_api_service.extensions
