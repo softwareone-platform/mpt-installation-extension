@@ -15,6 +15,16 @@ Build the development image and install dependencies:
 make build
 ```
 
+The default scope remains `all`. The frontend is "parked" while it has no
+modules: as long as `frontend/src/modules` contains no entrypoints, the default
+build and runtime commands skip it, and the Docker image build detects the same
+condition and skips `npm`, shipping an empty static tree. Use `scope=frontend`
+to run frontend commands explicitly. Adding a module under
+`frontend/src/modules` re-enables it automatically — both
+[`make/common.mk`](../make/common.mk) (via `FRONTEND_HAS_CODE`) and the
+[`Dockerfile`](../Dockerfile) `frontend-build` stage detect it on their own, with
+no flag to flip.
+
 ## Running the Service
 
 Start the service with Docker Compose:

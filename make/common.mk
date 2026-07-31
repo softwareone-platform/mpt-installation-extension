@@ -9,11 +9,15 @@ ifeq ($(filter $(scope),$(VALID_SCOPES)),)
 $(error Invalid scope '$(scope)'. Use one of: $(VALID_SCOPES))
 endif
 
+FRONTEND_HAS_CODE := $(wildcard frontend/src/modules/*/)
+# scope=frontend selects it always; scope=all only once it has code.
+FRONTEND_SELECTED := $(strip $(filter frontend,$(scope)) $(if $(FRONTEND_HAS_CODE),$(filter all,$(scope))))
+
 bash:  ## Open a bash shell
 	$(RUN_IT) bash
 
-build:  ## Build frontend assets and backend image. Optional: scope=backend|frontend|all
-	@if [ "$(scope)" = "frontend" ] || [ "$(scope)" = "all" ]; then \
+build:  ## Build the selected application scopes. Optional: scope=backend|frontend|all
+	@if [ -n "$(FRONTEND_SELECTED)" ]; then \
 		$(RUN_FRONTEND) bash -c "npm ci && npm run build"; \
 	fi
 	@if [ "$(scope)" = "backend" ] || [ "$(scope)" = "all" ]; then \
@@ -25,17 +29,17 @@ check:  ## Check code quality. Optional: scope=backend|frontend|all
 	@if [ "$(scope)" = "backend" ] || [ "$(scope)" = "all" ]; then \
 		$(RUN) bash -c "uv run ruff format --check . && uv run ruff check . && uv run flake8 . && uv run mypy . && uv lock --check"; \
 	fi
-	@if [ "$(scope)" = "frontend" ] || [ "$(scope)" = "all" ]; then \
+	@if [ -n "$(FRONTEND_SELECTED)" ]; then \
 		$(RUN_FRONTEND) bash -c "npm ci && npm run check"; \
 	fi
 
-check-all:  ## Run checks, tests, frontend build, and metadata validation. Optional: scope=backend|frontend|all
+check-all:  ## Run checks, tests, enabled frontend build, and metadata validation. Optional: scope=backend|frontend|all
 	$(MAKE) check scope=$(scope)
 	$(MAKE) test scope=$(scope)
-	@if [ "$(scope)" = "frontend" ] || [ "$(scope)" = "all" ]; then \
+	@if [ -n "$(FRONTEND_SELECTED)" ]; then \
 		$(RUN_FRONTEND) bash -c "npm ci && npm run build"; \
 	fi
-	@if [ "$(scope)" = "all" ]; then \
+	@if [ "$(scope)" = "backend" ] || [ "$(scope)" = "all" ]; then \
 		$(RUN) bash -c 'trap "rm -f meta.yaml meta.generated.yaml" EXIT; while IFS= read -r line || [ -n "$$line" ]; do case "$$line" in ""|\#*) continue;; esac; export "$$line"; done < .env.sample; uv run mpt-ext meta generate && uv run mpt-ext meta validate'; \
 	fi
 
@@ -46,7 +50,7 @@ format:  ## Format code. Optional: scope=backend|frontend|all
 	@if [ "$(scope)" = "backend" ] || [ "$(scope)" = "all" ]; then \
 		$(RUN) bash -c "uv run ruff check --select I --fix . && uv run ruff format ."; \
 	fi
-	@if [ "$(scope)" = "frontend" ] || [ "$(scope)" = "all" ]; then \
+	@if [ -n "$(FRONTEND_SELECTED)" ]; then \
 		$(RUN_FRONTEND) bash -c "npm ci && npm run format"; \
 	fi
 
@@ -56,7 +60,11 @@ logs: ## Show logs
 	elif [ "$(scope)" = "frontend" ]; then \
 		$(DC) logs -f frontend; \
 	elif [ "$(scope)" = "all" ]; then \
-		$(DC) logs -f backend frontend; \
+		if [ -n "$(FRONTEND_HAS_CODE)" ]; then \
+			$(DC) logs -f backend frontend; \
+		else \
+			$(DC) logs -f backend; \
+		fi; \
 	fi
 
 run:  ## Run service in platform integration mode
@@ -67,10 +75,14 @@ run:  ## Run service in platform integration mode
 		$(DC) up frontend; \
 	fi
 	@if [ "$(scope)" = "all" ]; then \
-		$(DC) up -d; \
+		if [ -n "$(FRONTEND_HAS_CODE)" ]; then \
+			$(DC) up -d; \
+		else \
+			$(DC) up -d backend; \
+		fi; \
 	fi
 
-run-local:  ## Run backend in --local mode with Jaeger and frontend watch static asset generation
+run-local:  ## Run backend in --local mode with Jaeger and the enabled frontend watcher
 	@if [ "$(scope)" = "backend" ]; then \
 		$(DC) -f compose.local.yaml up backend; \
 	fi
@@ -78,14 +90,18 @@ run-local:  ## Run backend in --local mode with Jaeger and frontend watch static
 		$(DC) -f compose.local.yaml up frontend; \
 	fi
 	@if [ "$(scope)" = "all" ]; then \
-		$(DC) -f compose.local.yaml up -d; \
+		if [ -n "$(FRONTEND_HAS_CODE)" ]; then \
+			$(DC) -f compose.local.yaml up -d; \
+		else \
+			$(DC) -f compose.local.yaml up -d backend; \
+		fi; \
 	fi
 
 test:  ## Run tests. Optional: scope=backend|frontend|all
 	@if [ "$(scope)" = "backend" ] || [ "$(scope)" = "all" ]; then \
 		$(RUN) pytest $(args); \
 	fi
-	@if [ "$(scope)" = "frontend" ] || [ "$(scope)" = "all" ]; then \
+	@if [ -n "$(FRONTEND_SELECTED)" ]; then \
 		$(RUN_FRONTEND) bash -c "npm ci && npm test"; \
 	fi
 
