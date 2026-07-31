@@ -23,7 +23,7 @@ worker:
 env:
   ExtMptProductExtensionMapping:
     name: EXT_MPT_PRODUCT_EXTENSION_MAPPING
-  ExtOperationsAccountId:
+  serviceConfigurationBaseAccountId:
     name: EXT_OPERATIONS_ACCOUNT_ID
   ExtMsteamsNotificationsEnabled:
     name: EXT_MSTEAMS_NOTIFICATIONS_ENABLED
