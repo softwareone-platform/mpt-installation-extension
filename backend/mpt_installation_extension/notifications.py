@@ -1,7 +1,6 @@
 import datetime as dt
 from typing import Any
 
-import httpx
 from mpt_extension_contrib.custom_notifications.channels.teams_async import AsyncTeamsNotifier
 from mpt_extension_contrib.custom_notifications.channels.teams_cards import FactsSection
 
@@ -25,21 +24,11 @@ async def notify_non_recoverable_failure(ctx: InstallationAgreementContext) -> N
         )
         return
 
-    try:
-        await teams.send_error(
-            "Extension installation failed permanently",
-            action.message,
-            facts=_build_facts(action.details),
-        )
-    # HACK: catching the transport exception is a workaround that couples us to the
-    # library's httpx internals; replace it with the library's own delivery error
-    # once mpt-extension-contrib-custom-notifications exposes one.
-    except httpx.HTTPError as error:
-        ctx.logger.warning(
-            "Failed to deliver the Teams notification for agreement %s: %s",
-            ctx.agreement.id,
-            error,
-        )
+    await teams.send_error(
+        "Extension installation failed permanently",
+        action.message,
+        facts=_build_facts(action.details),
+    )
 
 
 def _build_facts(details: dict[str, Any]) -> FactsSection:

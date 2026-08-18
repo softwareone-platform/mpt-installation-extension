@@ -1,7 +1,6 @@
 import dataclasses
 import datetime as dt
 
-import httpx
 import pytest
 from mpt_extension_contrib.custom_notifications import NotificationRegistry
 from mpt_extension_contrib.custom_notifications.channels.teams_async import AsyncTeamsNotifier
@@ -93,14 +92,6 @@ async def test_sends_error_card_facts(notifying_context, send_error_mock):
         "EXT-2222": "MPTError: invalid extension configuration",
     }
     assert dt.datetime.fromisoformat(timestamp).tzinfo is not None
-
-
-async def test_warns_when_delivery_fails(notifying_context, send_error_mock):
-    send_error_mock.side_effect = httpx.ConnectTimeout("timed out")
-
-    await notify_non_recoverable_failure(notifying_context)  # act
-
-    notifying_context.logger.warning.assert_called_once()
 
 
 async def test_warns_when_teams_not_configured(failure_context):
