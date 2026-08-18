@@ -34,6 +34,7 @@ async def test_agreements_active_account_ids_dedup(mocker, collection):
         str(agreements.filter.call_args.args[0])
         == "and(eq(status,'Active'),in(product.id,('PRD-1')))"
     )
+    agreements.select.assert_called_once_with("client", "product")
 
 
 async def test_installations_accounts_with_extension(mocker, collection):
@@ -52,3 +53,4 @@ async def test_installations_accounts_with_extension(mocker, collection):
         str(installations.filter.call_args.args[0])
         == "and(eq(extension.id,'EXT-1'),ne(account.id,null()))"
     )
+    installations.select.assert_called_once_with("account")
