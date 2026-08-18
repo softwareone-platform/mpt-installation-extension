@@ -128,6 +128,7 @@ async def test_pipeline_records_failure_action(
             "status_code": HTTPStatus.NOT_FOUND,
         },
     ]
+    assert ctx.installation_state.action.details["extension_id"] == "EXT-1111-1111"
     assert ctx.installation_state.action.target == (
         InstallationActionType.NOTIFY_NON_RECOVERABLE_FAILURE
     )
@@ -171,6 +172,37 @@ async def test_pipeline_raises_unexpected_error(installation_context, mocker, pi
 
     with pytest.raises(RuntimeError, match="broken"):
         await pipeline.execute(installation_context)
+
+
+@pytest.fixture
+def failing_installation_context(installation_context, mocker):
+    installation_context.mpt_api_service.extensions.get_by_id = mocker.AsyncMock(
+        side_effect=MPTError("invalid"),
+    )
+    return installation_context
+
+
+@pytest.fixture
+def notify_mock(mocker):
+    return mocker.patch(
+        "mpt_installation_extension.pipelines.agreement_installation."
+        "notify_non_recoverable_failure",
+    )
+
+
+async def test_pipeline_notifies(failing_installation_context, notify_mock, pipeline):
+    await pipeline.execute(failing_installation_context)  # act
+
+    notify_mock.assert_called_once_with(failing_installation_context)
+
+
+async def test_pipeline_notifies_once(failing_installation_context, notify_mock, pipeline):
+    ctx = failing_installation_context
+    await pipeline.execute(ctx)
+
+    await pipeline.on_step_succeeded(pipeline.steps[0], ctx)  # act
+
+    notify_mock.assert_called_once_with(ctx)
 
 
 async def test_pipeline_handles_action_once(installation_context, mocker, pipeline):

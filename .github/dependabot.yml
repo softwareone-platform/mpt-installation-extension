@@ -33,7 +33,9 @@ updates:
     commit-message:
       prefix: "deps"
       include: "scope"
-    open-pull-requests-limit: 5
+    # Frontend is parked: pause version-update PRs (0) while keeping security
+    # updates. Restore to 5 when frontend development resumes.
+    open-pull-requests-limit: 0
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
