@@ -1296,11 +1296,11 @@ wheels = [
 
 [[package]]
 name = "microsoft-teams-cards"
-version = "2.0.15"
+version = "2.0.14"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8a/0d/05054d629afb548937616a7e91cb8c2c2ffbf23e3ff774340ca0ee2a6dfa/microsoft_teams_cards-2.0.15.tar.gz", hash = "sha256:623d87fcd973c823deb5b78cccb27bc35471f535bef10116a7404255f6da5499", size = 28115, upload-time = "2026-08-04T17:12:03.284Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/45/73/5e337bf6bde2803d75e5990fc11085d83e99f6184bbd5d6efa5614a26239/microsoft_teams_cards-2.0.14.tar.gz", hash = "sha256:9a6170e72e9207c508b6cb91b950b7785177fbd57adb781c99bc8756e15e8977", size = 28109, upload-time = "2026-07-08T00:18:26.086Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7d/b8/c4e5df0f6797363ff8a431bcee1a51a7d8b6fe2e5d4cac21a6bd58e9f50f/microsoft_teams_cards-2.0.15-py3-none-any.whl", hash = "sha256:e2b0257d9b8782830df61eb6aa993a1ddc0349daddd845739da45d2a29a0c44b", size = 29602, upload-time = "2026-08-04T17:12:09.232Z" },
+    { url = "https://files.pythonhosted.org/packages/0b/e9/c22bec14a6f4e8d5e054c23f150012afbf1ef3acf4ee871fc885728eae92/microsoft_teams_cards-2.0.14-py3-none-any.whl", hash = "sha256:5e2eaaed534eab688c25c16111e0159d2946228c7c35315f92f22fff826a30c6", size = 29602, upload-time = "2026-07-08T00:18:32.732Z" },
 ]
 
 [[package]]

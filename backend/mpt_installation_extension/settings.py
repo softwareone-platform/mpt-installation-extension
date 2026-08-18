@@ -70,6 +70,10 @@ class MigrationExtensionSettings(ExtensionSettings):
     def load(cls) -> Self:
         return cls(
             product_extension_mapping=cls.json_env("EXT_MPT_PRODUCT_EXTENSION_MAPPING"),
+            teams_webhook_url=os.getenv("EXT_MSTEAMS_WEBHOOK_URL") or None,
+            teams_notifications_enabled=cls.bool_env(
+                "EXT_MSTEAMS_NOTIFICATIONS_ENABLED", default=False
+            ),
             operations_account_id=os.getenv("EXT_OPERATIONS_ACCOUNT_ID", ""),
         )
 

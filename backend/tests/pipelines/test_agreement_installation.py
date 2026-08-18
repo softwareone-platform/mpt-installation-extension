@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from http import HTTPStatus
 
 import pytest
@@ -177,12 +176,9 @@ async def test_pipeline_raises_unexpected_error(installation_context, mocker, pi
 
 @pytest.fixture
 def failing_installation_context(installation_context, mocker):
-    installation_service = installation_context.mpt_api_service.installations
-    installation_service.exists_for_account = mocker.AsyncMock(return_value=False, spec=Callable)
     installation_context.mpt_api_service.extensions.get_by_id = mocker.AsyncMock(
         side_effect=MPTError("invalid"),
     )
-    installation_service.create = mocker.AsyncMock()
     return installation_context
 
 
