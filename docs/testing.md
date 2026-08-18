@@ -16,8 +16,11 @@ The current backend test scope covers:
 - extension settings loading for product-to-extension mappings
 - agreement activation event router registration
 - extension installation creation for configured product mappings
-- idempotent skips when an account already has the extension installed
+- idempotent handling of existing installations via `409 CONFLICT`
 - partial API failure handling while processing multiple configured extensions
+- the installation creator service, including bulk reconciliation across accounts
+- the agreement query service resolving active-agreement accounts for a product
+- the migration mixin that builds the MPT API service from the environment
 
 ## Commands
 
@@ -34,6 +37,11 @@ Repository command mapping:
 - `make test` runs `pytest`
 - `make check` runs `ruff format --check`, `ruff check`, `flake8`, `mypy`, and `uv lock --check`
 - `make check-all` runs both checks and tests
+
+The default `all` scope skips frontend checks, tests, and builds while the
+frontend is parked (no modules under `frontend/src/modules`); see
+[`make/common.mk`](../make/common.mk). Use `scope=frontend` to run the frontend
+commands explicitly.
 
 The CI workflow in [`.github/workflows/pr-build-merge.yml`](../.github/workflows/pr-build-merge.yml) uses the same `make build` and `make check-all` flow.
 

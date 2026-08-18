@@ -1,6 +1,17 @@
 owner: marketplace-team
 dbup:
   enabled: false
+migrations:
+  data:
+    enabled: true
+    image: nlpapp0336cre.azurecr.io/mpt-extension-installation
+    command: ["mpt-service-cli"]
+    args: ["migrate", "--data"]
+  schema:
+    enabled: true
+    image: nlpapp0336cre.azurecr.io/mpt-extension-installation
+    command: ["mpt-service-cli"]
+    args: ["migrate", "--schema"]
 api:
   enabled: true
   image: mpt-extension-installation
@@ -12,6 +23,8 @@ worker:
 env:
   ExtMptProductExtensionMapping:
     name: EXT_MPT_PRODUCT_EXTENSION_MAPPING
+  serviceConfigurationBaseAccountId:
+    name: EXT_OPERATIONS_ACCOUNT_ID
   ExtMsteamsNotificationsEnabled:
     name: EXT_MSTEAMS_NOTIFICATIONS_ENABLED
     defaultValue: "false"

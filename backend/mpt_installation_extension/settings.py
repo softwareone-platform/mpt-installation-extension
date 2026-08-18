@@ -1,15 +1,19 @@
+import os
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Self, override
 
+from mpt_extension_contrib.custom_notifications.channels.teams_cards import TeamsSettings
 from mpt_extension_sdk.settings.extension import BaseExtensionSettings
 
 
 @dataclass(frozen=True)
-class ExtensionSettings(BaseExtensionSettings):
+class ExtensionSettings(BaseExtensionSettings, TeamsSettings):
     """Extension settings."""
 
     product_extension_mapping: dict[str, list[str]]
+    teams_webhook_url: str | None = None
+    teams_notifications_enabled: bool = False
 
     @property
     def product_ids(self) -> tuple[str, ...]:
@@ -37,6 +41,40 @@ class ExtensionSettings(BaseExtensionSettings):
     def load(cls) -> Self:
         return cls(
             product_extension_mapping=cls.json_env("EXT_MPT_PRODUCT_EXTENSION_MAPPING"),
+            teams_webhook_url=os.getenv("EXT_MSTEAMS_WEBHOOK_URL") or None,
+            teams_notifications_enabled=cls.bool_env(
+                "EXT_MSTEAMS_NOTIFICATIONS_ENABLED", default=False
+            ),
+        )
+
+
+@dataclass(frozen=True)
+class MigrationExtensionSettings(ExtensionSettings):
+    """Extension settings for migrations, adding the operations account id."""
+
+    operations_account_id: str = ""
+
+    @override
+    @property
+    def required_env_vars(self) -> list[tuple[Any, ...]]:
+        return [
+            *super().required_env_vars,
+            (
+                self.operations_account_id,
+                "Operations account id is required (EXT_OPERATIONS_ACCOUNT_ID)",
+            ),
+        ]
+
+    @override
+    @classmethod
+    def load(cls) -> Self:
+        return cls(
+            product_extension_mapping=cls.json_env("EXT_MPT_PRODUCT_EXTENSION_MAPPING"),
+            teams_webhook_url=os.getenv("EXT_MSTEAMS_WEBHOOK_URL") or None,
+            teams_notifications_enabled=cls.bool_env(
+                "EXT_MSTEAMS_NOTIFICATIONS_ENABLED", default=False
+            ),
+            operations_account_id=os.getenv("EXT_OPERATIONS_ACCOUNT_ID", ""),
         )
 
 
@@ -44,3 +82,9 @@ class ExtensionSettings(BaseExtensionSettings):
 def get_extension_settings() -> ExtensionSettings:
     """Return a cached `ExtensionSettings` instance."""
     return ExtensionSettings.load()
+
+
+@lru_cache(maxsize=1)
+def get_migration_settings() -> MigrationExtensionSettings:
+    """Return a cached `MigrationExtensionSettings` instance."""
+    return MigrationExtensionSettings.load()

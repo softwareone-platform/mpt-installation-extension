@@ -1,12 +1,10 @@
 import asyncio
 from collections.abc import Sequence
 from dataclasses import dataclass
-from http import HTTPStatus
 from typing import Protocol, TypeVar, cast, override
 
-from mpt_api_client.exceptions import MPTError, MPTHttpError
+from mpt_api_client.exceptions import MPTError
 from mpt_extension_sdk.errors.step import DeferStepError, SkipStepError
-from mpt_extension_sdk.models import Installation, InstallationReference
 from mpt_extension_sdk.pipeline import BaseStep
 
 from mpt_installation_extension.pipelines.context import (
@@ -18,6 +16,10 @@ from mpt_installation_extension.pipelines.errors import (
     RecoverableInstallationError,
     is_deferrable_error,
 )
+from mpt_installation_extension.services.extension_installation import (
+    ExtensionInstallationCreatorService,
+)
+from mpt_installation_extension.services.mpt_api_service import MPTAPIService
 
 _OutcomeT = TypeVar("_OutcomeT")
 
@@ -70,26 +72,16 @@ class InstallAgreementExtensionsStep(BaseStep):
 
     @override
     async def process(self, ctx: InstallationAgreementContext) -> None:
+        service = ExtensionInstallationCreatorService(cast(MPTAPIService, ctx.mpt_api_service))
         step_outcomes = await asyncio.gather(
             *(
-                self._install_extension(ctx, extension_id)
+                self._install_extension(service, ctx, extension_id)
                 for extension_id in self._get_extension_ids(ctx, ctx.agreement.product.id)
             ),
             return_exceptions=True,
         )
 
-        failures = self._get_outcomes_by_type(step_outcomes, InstallationFailure)
-        if failures:
-            ctx.installation_state.action = InstallationAction(
-                target=InstallationActionType.NOTIFY_NON_RECOVERABLE_FAILURE,
-                message="One or more extension installations failed permanently",
-                details={
-                    "agreement_id": ctx.agreement.id,
-                    "product_id": ctx.agreement.product.id,
-                    "client_id": ctx.agreement.client.id,
-                    "failures": [failure.to_dict() for failure in failures],
-                },
-            )
+        self._set_non_recoverable_failures_action(ctx, step_outcomes)
 
         recoverable_errors = self._get_outcomes_by_type(step_outcomes, RecoverableInstallationError)
         if recoverable_errors:
@@ -105,43 +97,6 @@ class InstallAgreementExtensionsStep(BaseStep):
         ]
         if unexpected_errors:
             raise unexpected_errors[0]
-
-    async def _create_installation(
-        self, ctx: InstallationAgreementContext, extension_id: str
-    ) -> InstallationFailure | None:
-        try:
-            extension = await ctx.mpt_api_service.extensions.get_by_id(extension_id)
-        except MPTError as error:
-            return self._handle_mpt_error(extension_id, error)
-
-        installation = Installation(
-            account=InstallationReference(id=ctx.agreement.client.id),
-            extension=InstallationReference(id=extension_id),
-            modules=[
-                InstallationReference(id=cast(str, module.id)) for module in extension.modules
-            ],
-        )
-        try:
-            await ctx.mpt_api_service.installations.create(installation)
-        except MPTError as error:
-            if not (isinstance(error, MPTHttpError) and error.status_code == HTTPStatus.CONFLICT):
-                return self._handle_mpt_error(extension_id, error)
-            ctx.logger.info(
-                "Skipping extension installation for agreement %s, account %s, "
-                "extension %s because an installation already exists",
-                ctx.agreement.id,
-                ctx.agreement.client.id,
-                extension_id,
-            )
-            return None
-
-        ctx.logger.info(
-            "Created extension installation for agreement %s, account %s, extension %s",
-            ctx.agreement.id,
-            ctx.agreement.client.id,
-            extension_id,
-        )
-        return None
 
     def _get_extension_ids(
         self, ctx: InstallationAgreementContext, product_id: str
@@ -162,23 +117,33 @@ class InstallAgreementExtensionsStep(BaseStep):
         return InstallationFailure.from_error(extension_id, error)
 
     async def _install_extension(
-        self, ctx: InstallationAgreementContext, extension_id: str
+        self,
+        service: ExtensionInstallationCreatorService,
+        ctx: InstallationAgreementContext,
+        extension_id: str,
     ) -> InstallationFailure | None:
         try:
-            installation_exists = await ctx.mpt_api_service.installations.exists_for_account(
-                extension_id=extension_id, account_id=ctx.agreement.client.id
+            await service.create_installation(
+                account_id=ctx.agreement.client.id, extension_id=extension_id
             )
         except MPTError as error:
             return self._handle_mpt_error(extension_id, error)
+        return None
 
-        if installation_exists:
-            ctx.logger.info(
-                "Skipping extension installation for agreement %s, account %s, "
-                "extension %s because an installation already exists",
-                ctx.agreement.id,
-                ctx.agreement.client.id,
-                extension_id,
-            )
-            return None
-
-        return await self._create_installation(ctx, extension_id)
+    def _set_non_recoverable_failures_action(
+        self, ctx: InstallationAgreementContext, step_outcomes: Sequence[object]
+    ) -> None:
+        failures = self._get_outcomes_by_type(step_outcomes, InstallationFailure)
+        if not failures:
+            return
+        ctx.installation_state.action = InstallationAction(
+            target=InstallationActionType.NOTIFY_NON_RECOVERABLE_FAILURE,
+            message="One or more extension installations failed permanently",
+            details={
+                "extension_id": ctx.runtime_settings.extension_id,
+                "agreement_id": ctx.agreement.id,
+                "product_id": ctx.agreement.product.id,
+                "client_id": ctx.agreement.client.id,
+                "failures": [failure.to_dict() for failure in failures],
+            },
+        )
