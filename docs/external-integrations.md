@@ -22,7 +22,6 @@ Non-recoverable installation failures are represented as an `InstallationAction`
 
 The notification is an Adaptive Card posted to a Teams Workflows webhook. It contains the extension id, agreement id, product id, client id, a timestamp, and one entry per failed extension with the error type and message.
 
-Configuration:
+The channel is configured through `EXT_MSTEAMS_NOTIFICATIONS_ENABLED` and `EXT_MSTEAMS_WEBHOOK_URL`, defined in the parameter reference in [docs/deployment.md](deployment.md).
 
-- `EXT_MSTEAMS_NOTIFICATIONS_ENABLED`: master switch, `false` by default. When disabled, the Teams channel is not registered and the hook logs a warning instead of sending.
-- `EXT_MSTEAMS_WEBHOOK_URL`: HTTPS webhook URL, required when notifications are enabled. When missing or not an `https://` URL, the hook logs a warning instead of sending.
+Whenever the channel is unavailable — notifications disabled, or the webhook missing or not an `https://` URL — the hook logs a warning and never breaks the installation flow.
