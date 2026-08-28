@@ -1,6 +1,4 @@
 owner: marketplace-team
-dbup:
-  enabled: false
 migrations:
   data:
     enabled: true
