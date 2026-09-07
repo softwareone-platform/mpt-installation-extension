@@ -52,7 +52,7 @@ env:
     name: SDK_ZITI_WORKERS
     defaultValue: "4"
 secrets:
-  AppInsightsConnectionString:
+  applicationInsightsConnectionString:
     name: SDK_APPLICATIONINSIGHTS_CONNECTION_STRING
   ExtMsteamsWebhookUrl:
     name: EXT_MSTEAMS_WEBHOOK_URL
