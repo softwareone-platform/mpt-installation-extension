@@ -55,12 +55,14 @@ For a local event run, the mocked Marketplace fixtures provide:
 - extension lookup for `/public/v1/integration/extensions/{extension_id}`
 - empty installation lookup for `/public/v1/integration/installations`
 - installation creation for `/public/v1/integration/installations`
+- task lookup for `/public/v1/system/tasks/{task_id}`, returning a `Queued` task with its time limits; the SDK reads the task before running a task-based handler
+- task log creation for `/public/v1/system/tasks/{task_id}/logs`; the other task lifecycle calls (execute, complete, fail, reschedule) fall through to the catch-all `200` mapping
 
-The Postman collection in [`backend/docs/postman_collection.json`](../backend/docs/postman_collection.json) contains a local agreement activation event that matches these fixtures.
+The Postman collection in [`backend/docs/postman_collection.json`](../backend/docs/postman_collection.json) contains local agreement activation events that match these fixtures. Each event carries a `task.id`, as required by the task-based route. The handler runs in the background, so every request answers `Delay`; the request name states the expected task outcome, which shows in the devmock request journal (`complete`, `reschedule`, or `fail`) and in the task logs.
 
 ## Environment Parameters
 
-Local startup requires an `.env` file consumed by Docker Compose.
+Local startup requires `backend/.env.local` (and optionally `backend/.env`), both consumed by Docker Compose.
 
 The parameter reference lives in [docs/deployment.md](deployment.md). Use that document for:
 
