@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathTemplate": "/public/v1/system/tasks/{taskId}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "{{request.path.taskId}}",
+      "status": "Queued",
+      "parameters": {
+        "extensionId": "EXT-1111-1111",
+        "maxTaskProcessingSeconds": 600,
+        "maxTaskLifetimeSeconds": 3600
+      }
+    },
+    "transformers": [
+      "response-template"
+    ]
+  },
+  "priority": 5
+}

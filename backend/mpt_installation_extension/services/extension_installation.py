@@ -11,6 +11,7 @@ from mpt_extension_sdk.models import Installation, InstallationReference
 from mpt_installation_extension.services.installation_report import (
     InstallationReport,
     InstallOutcome,
+    InstallResult,
 )
 from mpt_installation_extension.services.mpt_api_service import MPTAPIService
 
@@ -32,7 +33,7 @@ class ExtensionInstallationCreatorService:
         self._mpt_api_service = mpt_api_service
         self._create_semaphore = asyncio.Semaphore(MAX_CONCURRENT_INSTALLATIONS)
 
-    async def create_installation(self, *, account_id: str, extension_id: str) -> InstallOutcome:
+    async def create_installation(self, *, account_id: str, extension_id: str) -> InstallResult:
         """Create the installation for the account, tolerating an existing one."""
         extension = await self._mpt_api_service.extensions.get_by_id(extension_id)
         modules = [cast(str, module.id) for module in extension.modules]
@@ -60,7 +61,7 @@ class ExtensionInstallationCreatorService:
 
     async def _create(
         self, *, account_id: str, extension_id: str, modules: Sequence[str]
-    ) -> InstallOutcome:
+    ) -> InstallResult:
         installation = Installation(
             account=InstallationReference(id=account_id),
             extension=InstallationReference(id=extension_id),
@@ -68,7 +69,7 @@ class ExtensionInstallationCreatorService:
         )
         try:
             async with self._create_semaphore:
-                await self._mpt_api_service.installations.create(installation)
+                installation = await self._mpt_api_service.installations.create(installation)
         except MPTHttpError as error:
             if error.status_code != HTTPStatus.CONFLICT:
                 raise
@@ -77,14 +78,15 @@ class ExtensionInstallationCreatorService:
                 account_id,
                 extension_id,
             )
-            return InstallOutcome.ALREADY_EXISTS
+            return InstallResult(InstallOutcome.ALREADY_EXISTS)
 
         logger.info(
-            "Created installation for account %s, extension %s",
+            "Created installation %s for account %s, extension %s",
+            installation.id,
             account_id,
             extension_id,
         )
-        return InstallOutcome.CREATED
+        return InstallResult(InstallOutcome.CREATED, installation.id)
 
     async def _install_extension(
         self, extension_id: str, account_ids: Sequence[str]

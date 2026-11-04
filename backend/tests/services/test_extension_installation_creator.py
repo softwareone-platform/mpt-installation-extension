@@ -7,16 +7,29 @@ from mpt_extension_sdk.models import Installation
 from mpt_installation_extension.services.extension_installation import (
     ExtensionInstallationCreatorService,
 )
-from mpt_installation_extension.services.installation_report import InstallOutcome
+from mpt_installation_extension.services.installation_report import (
+    InstallOutcome,
+    InstallResult,
+)
 
 
-def raise_for_ext1(installation):
-    if installation.extension.id == "EXT-1":
-        raise MPTAPIError(
-            HTTPStatus.NOT_FOUND,
-            "Not found",
-            {"status": str(HTTPStatus.NOT_FOUND), "title": "Not found"},
-        )
+@pytest.fixture
+def created_installation(mocker):
+    return mocker.Mock(spec_set=["id"], id="INS-1")
+
+
+@pytest.fixture
+def create_failing_for_ext1(created_installation):
+    def factory(installation):
+        if installation.extension.id == "EXT-1":
+            raise MPTAPIError(
+                HTTPStatus.NOT_FOUND,
+                "Not found",
+                {"status": str(HTTPStatus.NOT_FOUND), "title": "Not found"},
+            )
+        return created_installation
+
+    return factory
 
 
 @pytest.fixture
@@ -36,12 +49,12 @@ def make_extension(mocker):
 
 
 @pytest.fixture
-def mpt_api_service(mocker, make_extension):
+def mpt_api_service(mocker, make_extension, created_installation):
     service = mocker.Mock(spec_set=["extensions", "installations", "agreements"])
     service.extensions = mocker.Mock(spec_set=["get_by_id"])
     service.extensions.get_by_id = mocker.AsyncMock(return_value=make_extension(["MOD-1"]))
     service.installations = mocker.Mock(spec_set=["create", "accounts_with_extension"])
-    service.installations.create = mocker.AsyncMock()
+    service.installations.create = mocker.AsyncMock(return_value=created_installation)
     service.installations.accounts_with_extension = mocker.AsyncMock(return_value=set())
     service.agreements = mocker.Mock(spec_set=["active_account_ids"])
     service.agreements.active_account_ids = mocker.AsyncMock(return_value=["ACC-1"])
@@ -57,16 +70,16 @@ async def test_create_installs_with_modules(service, mpt_api_service, make_exten
     mpt_api_service.extensions.get_by_id = mocker.AsyncMock(
         return_value=make_extension(["MOD-1", "MOD-2"])
     )
-    created = []
-    mpt_api_service.installations.create = mocker.AsyncMock(side_effect=created.append)
 
     result = await service.create_installation(account_id="ACC-1", extension_id="EXT-1")
 
-    assert result == InstallOutcome.CREATED
-    assert isinstance(created[0], Installation)
-    assert created[0].account.id == "ACC-1"
-    assert created[0].extension.id == "EXT-1"
-    assert [module.id for module in created[0].modules] == ["MOD-1", "MOD-2"]
+    create = mpt_api_service.installations.create
+    sent = create.await_args.args[0]
+    assert result == InstallResult(InstallOutcome.CREATED, "INS-1")
+    assert isinstance(sent, Installation)
+    assert sent.account.id == "ACC-1"
+    assert sent.extension.id == "EXT-1"
+    assert [module.id for module in sent.modules] == ["MOD-1", "MOD-2"]
 
 
 async def test_create_skips_on_conflict(service, mpt_api_service, make_mpt_error, mocker):
@@ -76,7 +89,7 @@ async def test_create_skips_on_conflict(service, mpt_api_service, make_mpt_error
 
     result = await service.create_installation(account_id="ACC-1", extension_id="EXT-1")
 
-    assert result == InstallOutcome.ALREADY_EXISTS
+    assert result == InstallResult(InstallOutcome.ALREADY_EXISTS)
 
 
 async def test_create_propagates_other_errors(service, mpt_api_service, make_mpt_error, mocker):
@@ -146,14 +159,14 @@ async def test_missing_counts_conflicts(service, mpt_api_service, make_mpt_error
     assert not result.failures
 
 
-async def test_missing_aggregates_failures(
-    service, mpt_api_service, single_target, make_mpt_error, mocker
+async def test_missing_aggregates_failures(  # noqa: WPS211
+    service, mpt_api_service, single_target, make_mpt_error, mocker, created_installation
 ):
     mpt_api_service.agreements.active_account_ids = mocker.AsyncMock(
         return_value=["ACC-1", "ACC-2"]
     )
     mpt_api_service.installations.create = mocker.AsyncMock(
-        side_effect=[make_mpt_error(HTTPStatus.NOT_FOUND, "Not found"), None]
+        side_effect=[make_mpt_error(HTTPStatus.NOT_FOUND, "Not found"), created_installation]
     )
 
     result = await service.create_missing_installations(single_target)
@@ -207,8 +220,10 @@ async def test_missing_records_active_agreements_error(
     mpt_api_service.installations.accounts_with_extension.assert_not_awaited()
 
 
-async def test_missing_isolates_failures_per_extension(service, mpt_api_service, mocker):
-    mpt_api_service.installations.create = mocker.AsyncMock(side_effect=raise_for_ext1)
+async def test_missing_isolates_failures_per_extension(
+    service, mpt_api_service, mocker, create_failing_for_ext1
+):
+    mpt_api_service.installations.create = mocker.AsyncMock(side_effect=create_failing_for_ext1)
 
     result = await service.create_missing_installations({"PRD-1": ["EXT-1", "EXT-2"]})
 
