@@ -85,9 +85,9 @@
         },
         "header": [],
         "url": {
-          "raw": "{{base_url}}/health",
+          "raw": "{{base_url}}/bypass/health",
           "host": ["{{base_url}}"],
-          "path": ["health"]
+          "path": ["bypass", "health"]
         }
       },
       "response": []
