@@ -14,10 +14,11 @@ This file documents only repository-specific testing behavior.
 The current backend test scope covers:
 
 - extension settings loading for product-to-extension mappings
-- agreement activation event router registration
+- agreement activation event router registration as a task-based route
 - extension installation creation for configured product mappings
 - idempotent handling of existing installations via `409 CONFLICT`
 - partial API failure handling while processing multiple configured extensions
+- task log records and the task failure raised for non-recoverable installation failures
 - the installation creator service, including bulk reconciliation across accounts
 - the agreement query service resolving active-agreement accounts for a product
 - the migration mixin that builds the MPT API service from the environment
