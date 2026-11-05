@@ -6,7 +6,7 @@ It is the source of truth for environment parameters referenced by local develop
 
 ## Configuration Source
 
-The repository runtime expects environment variables, typically provided through `backend/.env` for local Docker Compose usage.
+The repository runtime expects environment variables: `make run` reads the optional `backend/.env`, and `make run-local` additionally requires `backend/.env.local` (see [local-development.md](local-development.md)).
 
 Local setup instructions live in [docs/local-development.md](local-development.md).
 
