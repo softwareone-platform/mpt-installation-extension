@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathTemplate": "/public/v1/integration/installations",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$[?(@.extension.id == 'EXT-2222-EXISTS')]"
+      }
+    ]
+  },
+  "response": {
+    "status": 409,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "status": "409",
+      "title": "Installation already exists"
+    }
+  },
+  "priority": 1
+}
