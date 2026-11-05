@@ -45,6 +45,14 @@ make down
 
 ## Running With Devmock
 
+Start the backend in local mode with:
+
+```bash
+make run-local
+```
+
+`make run-local` uses `compose.local.yaml`: it loads `backend/.env.local` (required) and the optional `backend/.env`, and starts the backend with devmock and Jaeger.
+
 The local compose override starts WireMock as `devmock` on `http://localhost:8000`.
 
 The sample environment in [`backend/.env.sample`](../backend/.env.sample) points `MPT_API_BASE_URL` and `SDK_EXTENSION_URL` to `http://devmock:8000` and configures product `PRD-1111-1111` to install extension `EXT-1111-1112`.
@@ -55,6 +63,7 @@ For a local event run, the mocked Marketplace fixtures provide:
 - extension lookup for `/public/v1/integration/extensions/{extension_id}`
 - empty installation lookup for `/public/v1/integration/installations`
 - installation creation for `/public/v1/integration/installations`
+- an installation conflict (`409`) for extension `EXT-2222-EXISTS`, so the skip-existing Postman request exercises the already-exists path
 - task lookup for `/public/v1/system/tasks/{task_id}`, returning a `Queued` task with its time limits; the SDK reads the task before running a task-based handler
 - task log creation for `/public/v1/system/tasks/{task_id}/logs`; the other task lifecycle calls (execute, complete, fail, reschedule) fall through to the catch-all `200` mapping
 
