@@ -6,7 +6,7 @@ It is the source of truth for environment parameters referenced by local develop
 
 ## Configuration Source
 
-The repository runtime expects environment variables, typically provided through `.env` for local Docker Compose usage.
+The repository runtime expects environment variables: `make run` reads the optional `backend/.env`, and `make run-local` additionally requires `backend/.env.local` (see [local-development.md](local-development.md)).
 
 Local setup instructions live in [docs/local-development.md](local-development.md).
 
@@ -28,7 +28,7 @@ Local setup instructions live in [docs/local-development.md](local-development.m
 
 ## Local Example
 
-Example `.env` snippet:
+Example `backend/.env` snippet:
 
 ```env
 EXT_MPT_PRODUCT_EXTENSION_MAPPING={"PRD-1111-1111":["EXT-1111-1112"]}

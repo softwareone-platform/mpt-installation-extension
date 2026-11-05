@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "mpt-installation-extension",
-    "description": "Sample requests for the MPT Installation Extension backend running locally on `{{base_url}}` (default `http://localhost:8080`).\n\nAuth is wired automatically:\n\n- A collection-level pre-request script builds a non-prod HS256 JWT from the `extension_id`, `account_id` and `account_type` variables and stores it in `auth_token`.\n- Every authenticated request sends `Authorization: Bearer {{auth_token}}` via collection-level Bearer auth (`/health` opts out).\n\nThe default variables match the devmock fixtures used by `compose.local.yaml`: agreement `{{agreement_id}}` resolves to product `PRD-1111-1111`, which is mapped in `backend/.env.sample` to extension `EXT-1111-1112`.",
+    "description": "Sample requests for the MPT Installation Extension backend running locally on `{{base_url}}` (default `http://localhost:8080`).\n\nAuth is wired automatically:\n\n- A collection-level pre-request script builds a non-prod HS256 JWT from the `extension_id`, `account_id` and `account_type` variables and stores it in `auth_token`.\n- Every authenticated request sends `Authorization: Bearer {{auth_token}}` via collection-level Bearer auth (`/bypass/health` opts out).\n\nThe default variables match the devmock fixtures used by `compose.local.yaml`: agreement `{{agreement_id}}` resolves to product `PRD-1111-1111`, which is mapped in `backend/.env.sample` to extension `EXT-1111-1112`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -85,15 +85,15 @@
         },
         "header": [],
         "url": {
-          "raw": "{{base_url}}/health",
+          "raw": "{{base_url}}/bypass/health",
           "host": ["{{base_url}}"],
-          "path": ["health"]
+          "path": ["bypass", "health"]
         }
       },
       "response": []
     },
     {
-      "name": "event / agreement-complete — create missing installation (expected OK)",
+      "name": "event / agreement-complete — create missing installation (expected task completed)",
       "request": {
         "method": "POST",
         "header": [
@@ -102,7 +102,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"id\": \"EVT-1111-1111\",\n  \"object\": {\n    \"id\": \"{{agreement_id}}\",\n    \"name\": \"Playground Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "raw": "{\n  \"id\": \"EVT-1111-1111\",\n  \"task\": {\n    \"id\": \"TSK-1111-1111\"\n  },\n  \"object\": {\n    \"id\": \"{{agreement_id}}\",\n    \"name\": \"Playground Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -118,7 +118,7 @@
       "response": []
     },
     {
-      "name": "event / agreement-complete — skip existing installation (expected OK)",
+      "name": "event / agreement-complete — skip existing installation (expected task completed)",
       "request": {
         "method": "POST",
         "header": [
@@ -127,7 +127,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"id\": \"EVT-2222-EXISTS\",\n  \"object\": {\n    \"id\": \"AGR-2222-EXISTS\",\n    \"name\": \"Existing Installation Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "raw": "{\n  \"id\": \"EVT-2222-EXISTS\",\n  \"task\": {\n    \"id\": \"TSK-2222-EXISTS\"\n  },\n  \"object\": {\n    \"id\": \"AGR-2222-EXISTS\",\n    \"name\": \"Existing Installation Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -143,7 +143,7 @@
       "response": []
     },
     {
-      "name": "event / agreement-complete — recoverable failure (expected DEFER)",
+      "name": "event / agreement-complete — recoverable failure (expected task rescheduled)",
       "request": {
         "method": "POST",
         "header": [
@@ -152,7 +152,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"id\": \"EVT-3333-RECOVERABLE\",\n  \"object\": {\n    \"id\": \"AGR-3333-RECOVERABLE\",\n    \"name\": \"Recoverable Failure Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "raw": "{\n  \"id\": \"EVT-3333-RECOVERABLE\",\n  \"task\": {\n    \"id\": \"TSK-3333-RECOVERABLE\"\n  },\n  \"object\": {\n    \"id\": \"AGR-3333-RECOVERABLE\",\n    \"name\": \"Recoverable Failure Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -168,7 +168,7 @@
       "response": []
     },
     {
-      "name": "event / agreement-complete — non-recoverable failure notification (expected OK)",
+      "name": "event / agreement-complete — non-recoverable failure notification (expected task failed)",
       "request": {
         "method": "POST",
         "header": [
@@ -177,7 +177,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"id\": \"EVT-4444-NONRECOVERABLE\",\n  \"object\": {\n    \"id\": \"AGR-4444-NONRECOVERABLE\",\n    \"name\": \"Non Recoverable Failure Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "raw": "{\n  \"id\": \"EVT-4444-NONRECOVERABLE\",\n  \"task\": {\n    \"id\": \"TSK-4444-NONRECOVERABLE\"\n  },\n  \"object\": {\n    \"id\": \"AGR-4444-NONRECOVERABLE\",\n    \"name\": \"Non Recoverable Failure Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -193,7 +193,7 @@
       "response": []
     },
     {
-      "name": "event / agreement-complete — mixed recoverable and non-recoverable failures (expected DEFER)",
+      "name": "event / agreement-complete — mixed recoverable and non-recoverable failures (expected task rescheduled)",
       "request": {
         "method": "POST",
         "header": [
@@ -202,7 +202,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"id\": \"EVT-5555-MIXED\",\n  \"object\": {\n    \"id\": \"AGR-5555-MIXED\",\n    \"name\": \"Mixed Failures Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "raw": "{\n  \"id\": \"EVT-5555-MIXED\",\n  \"task\": {\n    \"id\": \"TSK-5555-MIXED\"\n  },\n  \"object\": {\n    \"id\": \"AGR-5555-MIXED\",\n    \"name\": \"Mixed Failures Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -218,7 +218,7 @@
       "response": []
     },
     {
-      "name": "event / agreement-complete — multiple non-recoverable failures (expected OK)",
+      "name": "event / agreement-complete — multiple non-recoverable failures (expected task failed)",
       "request": {
         "method": "POST",
         "header": [
@@ -227,7 +227,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"id\": \"EVT-6666-MULTIPLE-NONRECOVERABLE\",\n  \"object\": {\n    \"id\": \"AGR-6666-MULTIPLE-NONRECOVERABLE\",\n    \"name\": \"Multiple Non Recoverable Failures Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "raw": "{\n  \"id\": \"EVT-6666-MULTIPLE-NONRECOVERABLE\",\n  \"task\": {\n    \"id\": \"TSK-6666-MULTIPLE-NONRECOVERABLE\"\n  },\n  \"object\": {\n    \"id\": \"AGR-6666-MULTIPLE-NONRECOVERABLE\",\n    \"name\": \"Multiple Non Recoverable Failures Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -243,7 +243,7 @@
       "response": []
     },
     {
-      "name": "event / agreement-complete — unconfigured product (expected OK skip)",
+      "name": "event / agreement-complete — unconfigured product (expected task completed, skipped)",
       "request": {
         "method": "POST",
         "header": [
@@ -252,7 +252,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"id\": \"EVT-NOT-CONFIGURED\",\n  \"object\": {\n    \"id\": \"AGR-NOT-CONFIGURED\",\n    \"name\": \"Unconfigured Product Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
+          "raw": "{\n  \"id\": \"EVT-NOT-CONFIGURED\",\n  \"task\": {\n    \"id\": \"TSK-NOT-CONFIGURED\"\n  },\n  \"object\": {\n    \"id\": \"AGR-NOT-CONFIGURED\",\n    \"name\": \"Unconfigured Product Agreement\",\n    \"objectType\": \"Agreement\"\n  },\n  \"details\": {\n    \"eventType\": \"platform.commerce.agreement.status_changed\",\n    \"enqueueTime\": \"2026-03-06T12:00:00Z\",\n    \"deliveryTime\": \"2026-03-06T12:01:00Z\"\n  }\n}",
           "options": {
             "raw": {
               "language": "json"

@@ -1,5 +1,6 @@
 from typing import cast, override
 
+from mpt_extension_sdk.errors.pipeline import FailError
 from mpt_extension_sdk.pipeline import BasePipeline, BaseStep, EventBaseContext
 
 from mpt_installation_extension.notifications import notify_non_recoverable_failure
@@ -29,6 +30,7 @@ class AgreementInstallationPipeline(BasePipeline):
         if action is None or installation_ctx.installation_state.handled:
             return
 
+        installation_ctx.installation_state.handled = True
         if action.target == InstallationActionType.NOTIFY_NON_RECOVERABLE_FAILURE:
             installation_ctx.logger.error(
                 "Non-recoverable extension installation failure notification. "
@@ -37,5 +39,4 @@ class AgreementInstallationPipeline(BasePipeline):
                 action.details,
             )
             await notify_non_recoverable_failure(installation_ctx)
-
-        installation_ctx.installation_state.handled = True
+            raise FailError(action.message)

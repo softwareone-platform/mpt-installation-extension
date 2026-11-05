@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathTemplate": "/public/v1/system/tasks/{taskId}/logs"
+  },
+  "response": {
+    "status": 201,
+    "headers": { "Content-Type": "application/json" },
+    "body": "{{{request.body}}}",
+    "transformers": ["response-template"]
+  },
+  "priority": 5
+}

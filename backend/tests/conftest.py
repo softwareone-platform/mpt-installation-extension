@@ -43,9 +43,10 @@ def agreement_context_factory(mocker):
         ctx = AgreementContext(
             logger=mocker.Mock(spec=logging.Logger),
             meta=EventMetadata(
-                event_id="EVT-1", object_id="AGR-1", object_type="Agreement", task_id=""
+                event_id="EVT-1", object_id="AGR-1", object_type="Agreement", task_id="TSK-1"
             ),
             mpt_api_service=mpt_api_service,
+            vendor_mpt_api_service=mocker.Mock(spec_set=[]),
             auth=AuthContext(
                 token=AUTH_TOKEN,
                 account=AuthAccount(id="ACC-CLIENT", type=AccountType.CLIENT),

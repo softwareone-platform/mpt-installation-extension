@@ -12,6 +12,14 @@ class InstallOutcome(StrEnum):
 
 
 @dataclass(frozen=True)
+class InstallResult:
+    """Outcome of an installation attempt, with the id of the installation it created."""
+
+    outcome: InstallOutcome
+    installation_id: str | None = None
+
+
+@dataclass(frozen=True)
 class FailedInstallation:
     """A failed installation. ``account_id`` is ``None`` for extension-level failures."""
 
@@ -40,7 +48,7 @@ class InstallationReport:
         cls,
         extension_id: str,
         account_ids: Sequence[str],
-        outcomes: "Sequence[InstallOutcome | BaseException]",
+        outcomes: "Sequence[InstallResult | BaseException]",
         already_installed: int = 0,
     ) -> Self:
         """Build a report from the per-account outcomes of installing one extension.
@@ -68,7 +76,7 @@ class InstallationReport:
         self.failures.extend(other.failures)
 
     def record(
-        self, *, account_id: str, extension_id: str, outcome: "InstallOutcome | BaseException"
+        self, *, account_id: str, extension_id: str, outcome: "InstallResult | BaseException"
     ) -> None:
         """Count a single installation outcome, capturing failures."""
         if isinstance(outcome, BaseException):
@@ -77,7 +85,7 @@ class InstallationReport:
                     account_id=account_id, extension_id=extension_id, error=str(outcome)
                 )
             )
-        elif outcome == InstallOutcome.CREATED:
+        elif outcome.outcome == InstallOutcome.CREATED:
             self.created += 1
         else:
             self.already_exists += 1

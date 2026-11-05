@@ -11,6 +11,7 @@ from mpt_installation_extension.pipelines.context import (
     InstallationAction,
     InstallationActionType,
     InstallationAgreementContext,
+    InstallationOutcome,
 )
 from mpt_installation_extension.pipelines.errors import (
     RecoverableInstallationError,
@@ -19,6 +20,7 @@ from mpt_installation_extension.pipelines.errors import (
 from mpt_installation_extension.services.extension_installation import (
     ExtensionInstallationCreatorService,
 )
+from mpt_installation_extension.services.installation_report import InstallOutcome
 from mpt_installation_extension.services.mpt_api_service import MPTAPIService
 
 _OutcomeT = TypeVar("_OutcomeT")
@@ -111,9 +113,25 @@ class InstallAgreementExtensionsStep(BaseStep):
             step_outcome for step_outcome in step_outcomes if isinstance(step_outcome, outcome_type)
         ]
 
-    def _handle_mpt_error(self, extension_id: str, error: MPTError) -> InstallationFailure:
+    def _handle_mpt_error(
+        self,
+        ctx: InstallationAgreementContext,
+        extension_id: str,
+        target: str,
+        error: MPTError,
+    ) -> InstallationFailure:
         if is_deferrable_error(error):
+            ctx.installation_state.record(
+                extension_id,
+                InstallationOutcome.RETRY,
+                f"Installation of {target} failed and will be retried: {error}",
+            )
             raise RecoverableInstallationError(extension_id, error)
+        ctx.installation_state.record(
+            extension_id,
+            InstallationOutcome.FAILED,
+            f"Installation of {target} failed permanently: {error}",
+        )
         return InstallationFailure.from_error(extension_id, error)
 
     async def _install_extension(
@@ -122,12 +140,21 @@ class InstallAgreementExtensionsStep(BaseStep):
         ctx: InstallationAgreementContext,
         extension_id: str,
     ) -> InstallationFailure | None:
+        account_id = ctx.agreement.client.id
+        target = f"extension {extension_id} for account {account_id}"
         try:
-            await service.create_installation(
-                account_id=ctx.agreement.client.id, extension_id=extension_id
+            install_result = await service.create_installation(
+                account_id=account_id, extension_id=extension_id
             )
         except MPTError as error:
-            return self._handle_mpt_error(extension_id, error)
+            return self._handle_mpt_error(ctx, extension_id, target, error)
+        if install_result.outcome == InstallOutcome.CREATED:
+            message = f"Created installation {install_result.installation_id} of {target}"
+        else:
+            message = f"Installation of {target} already exists"
+        ctx.installation_state.record(
+            extension_id, InstallationOutcome(install_result.outcome), message
+        )
         return None
 
     def _set_non_recoverable_failures_action(

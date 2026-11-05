@@ -13,6 +13,24 @@ class InstallationActionType(StrEnum):
     NOTIFY_NON_RECOVERABLE_FAILURE = "NotifyNonRecoverableFailure"
 
 
+class InstallationOutcome(StrEnum):
+    """Outcome of installing one configured extension during a run."""
+
+    CREATED = "Created"
+    ALREADY_EXISTS = "AlreadyExists"
+    RETRY = "Retry"
+    FAILED = "Failed"
+
+
+@dataclass(frozen=True)
+class InstallationResult:
+    """Outcome of installing one configured extension, described for consumers."""
+
+    extension_id: str
+    outcome: InstallationOutcome
+    message: str
+
+
 @dataclass(frozen=True)
 class InstallationAction:
     """Structured installation side effect intent declared by pipeline steps."""
@@ -28,6 +46,11 @@ class InstallationState:
 
     action: InstallationAction | None = None
     handled: bool = False
+    installations: list[InstallationResult] = field(default_factory=list)
+
+    def record(self, extension_id: str, outcome: InstallationOutcome, message: str) -> None:
+        """Record the outcome of installing one configured extension."""
+        self.installations.append(InstallationResult(extension_id, outcome, message))
 
 
 @dataclass(kw_only=True)

@@ -14,6 +14,8 @@ The devmock fixtures are intentionally minimal. They support the agreement activ
 
 The current local happy path returns an active agreement for product `PRD-1111-1111`, an empty installation search result, extension module data, and a created installation response.
 
+For the task-based delivery, [`get_task.json`](../peripherals/devmock/mappings/mpt/get_task.json) returns a `Queued` task with its time limits and [`create_task_log.json`](../peripherals/devmock/mappings/mpt/create_task_log.json) echoes the created log record; the other task lifecycle calls fall through to the catch-all mapping. See [local-development.md](local-development.md) for how to follow each run's outcome.
+
 The Teams webhook is not mocked locally: the shared notification package requires an `https://` webhook URL with a valid certificate, while devmock serves plain HTTP. Local setup keeps `EXT_MSTEAMS_WEBHOOK_URL` unset, so the non-recoverable failure requests in the Postman collection exercise the notification code path and the backend logs a warning instead of sending. To test a real delivery, point `EXT_MSTEAMS_WEBHOOK_URL` at a test Teams channel webhook and set `EXT_MSTEAMS_NOTIFICATIONS_ENABLED=true`.
 
 ## Notification Integration
